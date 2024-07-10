@@ -10,4 +10,5 @@ public class Message {
     private String recipient;
     private String time;
 
+
 }

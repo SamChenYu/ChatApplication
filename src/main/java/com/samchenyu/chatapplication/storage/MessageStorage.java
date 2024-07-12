@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class MessageStorage {
-    private static Map<String, String> messages = new LinkedHashMap<>();
+    private static Map<String, List<Message>> messages = new LinkedHashMap<>();
     private static MessageStorage instance;
 
 
@@ -19,7 +19,10 @@ public class MessageStorage {
         return instance;
     }
 
-    public List<Message> getMessages(String username) {
+    public List<Message> getMessages(String username1, String username2) {
+
+
+
         List<Message> result = new ArrayList<>();
 
         // fetch the last 20 messages

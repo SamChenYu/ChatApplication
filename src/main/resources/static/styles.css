@@ -7,6 +7,8 @@
 html, body {
     height: 100%;
     font: 100%/1.5em "Varela Round", sans-serif;
+    margin: 0;
+    padding: 0;
 }
 
 body {
@@ -47,6 +49,9 @@ input {
     border: none;
     color: white;
     flex: 1;
+    padding-top: 1em;
+    text-align: center;
+    font-size: 1.25em;
 }
 
 .msg {

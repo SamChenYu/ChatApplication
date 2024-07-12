@@ -13,8 +13,9 @@ import com.samchenyu.chatapplication.storage.*;
 @AllArgsConstructor
 public class MessagingService {
 
-    private final MessageStorage messageStorage;
-    private final UserStorage userStorage;
+    private final MessageStorage messageStorage = MessageStorage.getInstance();
+    private final UserStorage userStorage = UserStorage.getInstance();
+
 
 
 

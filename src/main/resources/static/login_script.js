@@ -7,6 +7,12 @@ document.addEventListener("DOMContentLoaded", (event) => {
         document.getElementById("remember").checked = true;
     }
 
+
+
+
+
+    // ALL THE GRAPHICAL ELEMENTS
+
     document
 
         .getElementById("togglePassword")

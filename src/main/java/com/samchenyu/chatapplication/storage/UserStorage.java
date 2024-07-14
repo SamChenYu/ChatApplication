@@ -19,8 +19,14 @@ public class UserStorage {
         user2.setUsername("user2");
         user2.setPassword("user2");
 
+        User user3 = new User();
+        user3.setUsername("user3");
+        user3.setPassword("user3");
+
+
         users.add(user1);
         users.add(user2);
+        users.add(user3);
     }
 
     public static synchronized UserStorage getInstance() {

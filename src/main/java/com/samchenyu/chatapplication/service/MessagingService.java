@@ -19,21 +19,8 @@ public class MessagingService {
     private final UserStorage userStorage = UserStorage.getInstance();
     private final ChatStorage chatStorage = ChatStorage.getInstance();
 
-    public Chat newChat(User user1, User user2) {
-        Chat chat = new Chat();
-        chat.setChatID(UUID.randomUUID().toString());
-        chat.getParticipants().add(user1);
-        chat.getParticipants().add(user2);
-        chatStorage.addChat(chat);
-        return chat;
-
-    }
-
     public Chat connectToChat(User user1, User user2) {
-        Chat chat = chatStorage.getChat(user1, user2);
-        if (chat == null) {
-            chat = newChat(user1, user2);
-        }
+        Chat chat = chatStorage.getInstance().getChat(user1, user2);
         return chat;
     }
 
@@ -45,7 +32,7 @@ public class MessagingService {
         if(message == null) {
             return null;
         }
-        Chat chat = chatStorage.getChatByID(chatID);
+        Chat chat = chatStorage.getInstance().getChatByID(chatID);
         chat.addMessage(message);
 
         return chat;

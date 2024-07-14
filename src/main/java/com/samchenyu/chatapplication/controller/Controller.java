@@ -49,6 +49,47 @@ public class Controller {
 
      */
 
+
+    @PostMapping("/sendmessage")
+    public ResponseEntity<Chat> sendMessage(@RequestBody Message message) {
+        Chat chat = messagingService.sendMessage(message.getChatID(), message);
+        if (chat == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        // sends the message to the socket
+        simpMessagingTemplate.convertAndSend("/topic/" + message.getChatID(), message);
+        return ResponseEntity.ok(chat);
+    }
+
+    /* address: localhost:8080/sendmessage
+        sample json to send in postman
+        {
+            "from": "user1",
+            "recipient": "user2",
+            "text": "this is a new message",
+            "time": "12:00",
+            "chatID": "chat1"
+        }
+     */
+
+    @PostMapping("/newchat")
+    public ResponseEntity<Chat> newChat(@RequestBody ChatRequest chatRequest) {
+        User recipientUser = new User();
+        recipientUser.setUsername(chatRequest.getRecipient());
+        Chat chat = messagingService.connectToChat(chatRequest.getUser(), recipientUser);
+        return ResponseEntity.ok(chat);
+    }
+    /* address: localhost:8080/newchat
+        sample json to send in postman
+        {
+            "user": {
+                "username": "user1",
+                "password": "user1"
+            },
+            "recipient": "user2"
+        }
+     */
+
     @PostMapping("/hello")
     public ResponseEntity<String> hello() {
         return ResponseEntity.ok("Hello World");

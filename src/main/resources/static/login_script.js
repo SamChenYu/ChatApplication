@@ -1,80 +1,3 @@
-document.addEventListener("DOMContentLoaded", (event) => {
-    const savedUsername = localStorage.getItem("rememberedUsername");
-
-    if (savedUsername) {
-        document.getElementById("user").value = savedUsername;
-
-        document.getElementById("remember").checked = true;
-    }
-
-
-
-
-
-    // ALL THE GRAPHICAL ELEMENTS
-
-    document
-
-        .getElementById("togglePassword")
-
-        .addEventListener("click", function () {
-            const passwordField = document.getElementById("pass");
-
-            const type =
-                passwordField.getAttribute("type") === "password" ? "text" : "password";
-
-            passwordField.setAttribute("type", type);
-
-            this.classList.toggle("bx-hide");
-
-            this.classList.toggle("bx-show");
-        });
-
-    document
-
-        .querySelector(".forgot a")
-
-        .addEventListener("click", function (event) {
-            event.preventDefault();
-
-            openModal("forgotPasswordModal");
-        });
-
-    document
-        .querySelector(".register a")
-        .addEventListener("click", function (event) {
-            event.preventDefault();
-            openModal("registerModal");
-        });
-
-    function openModal(modalId) {
-        document.getElementById(modalId).style.display = "block";
-    }
-
-    function closeModal(modalId) {
-        document.getElementById(modalId).style.display = "none";
-    }
-
-    window.onclick = function (event) {
-        if (event.target.classList.contains("modal")) {
-            event.target.style.display = "none";
-        }
-    };
-
-    window.closeModal = closeModal;
-});
-
-function showError(element, message) {
-    const errorSpan = document.createElement("span");
-    errorSpan.className = "error-message";
-    errorSpan.textContent = message;
-    element.parentElement.appendChild(errorSpan);
-}
-
-function clearErrors() {
-    const errors = document.querySelectorAll(".error-message");
-    errors.forEach((error) => error.remove());
-}
 
 async function handleLogin() {
     clearErrors();
@@ -106,7 +29,7 @@ async function handleLogin() {
     }
 
     try {
-        const response = await fetch("/login", {
+        const response = await fetch("http://localhost:8080/login", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -117,7 +40,7 @@ async function handleLogin() {
         const result = await response.json();
 
         if (response.ok) {
-            alert("Logged in successfully");
+            window.location.href = "message.html";
         } else {
             showError(document.getElementById("pass"), result.message);
         }
@@ -216,6 +139,99 @@ async function handleForgotPassword() {
         );
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", (event) => {
+    const savedUsername = localStorage.getItem("rememberedUsername");
+
+    if (savedUsername) {
+        document.getElementById("user").value = savedUsername;
+
+        document.getElementById("remember").checked = true;
+    }
+
+
+
+
+
+    // ALL THE GRAPHICAL ELEMENTS
+
+    document
+
+        .getElementById("togglePassword")
+
+        .addEventListener("click", function () {
+            const passwordField = document.getElementById("pass");
+
+            const type =
+                passwordField.getAttribute("type") === "password" ? "text" : "password";
+
+            passwordField.setAttribute("type", type);
+
+            this.classList.toggle("bx-hide");
+
+            this.classList.toggle("bx-show");
+        });
+
+    document
+
+        .querySelector(".forgot a")
+
+        .addEventListener("click", function (event) {
+            event.preventDefault();
+
+            openModal("forgotPasswordModal");
+        });
+
+    document
+        .querySelector(".register a")
+        .addEventListener("click", function (event) {
+            event.preventDefault();
+            openModal("registerModal");
+        });
+
+    function openModal(modalId) {
+        document.getElementById(modalId).style.display = "block";
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = "none";
+    }
+
+    window.onclick = function (event) {
+        if (event.target.classList.contains("modal")) {
+            event.target.style.display = "none";
+        }
+    };
+
+    window.closeModal = closeModal;
+});
+
+function showError(element, message) {
+    const errorSpan = document.createElement("span");
+    errorSpan.className = "error-message";
+    errorSpan.textContent = message;
+    element.parentElement.appendChild(errorSpan);
+}
+
+function clearErrors() {
+    const errors = document.querySelectorAll(".error-message");
+    errors.forEach((error) => error.remove());
+}
+
 
 function checkPasswordStrength(password) {
     const strengthIndicator = document.getElementById("passwordStrength");

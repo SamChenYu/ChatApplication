@@ -4,7 +4,7 @@
 
 body {
     padding: 5%;
-    background-color: #F5F5F5;
+    background-color: #9a90f5;;
 }
 
 .container {
@@ -19,11 +19,11 @@ body {
     float: left;
     height: 700px;;
     width: 70px;
-    background: #4768b5;
-    background: -webkit-linear-gradient(#4768b5, #35488e);
-    background: -o-linear-gradient(#4768b5, #35488e);
-    background: -moz-linear-gradient(#4768b5, #35488e);
-    background: linear-gradient(#4768b5, #35488e);
+    background: #6657f4;
+    background: -webkit-linear-gradient(#6657f4, #35488e);
+    background: -o-linear-gradient(#6657f4, #35488e);
+    background: -moz-linear-gradient(#6657f4, #35488e);
+    background: linear-gradient(#6657f4, #35488e);
     box-shadow: 0 10px 20px rgba(0,0,0,0.19);
 }
 

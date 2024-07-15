@@ -135,6 +135,10 @@ body {
     background-repeat: no-repeat;
 }
 
+.discussion.message-active {
+    overflow: auto;
+}
+
 .online {
     position: relative;
     top: 30px;

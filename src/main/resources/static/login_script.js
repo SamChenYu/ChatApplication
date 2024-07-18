@@ -5,7 +5,6 @@ async function handleLogin() {
     const username = document.getElementById("user").value;
     const password = document.getElementById("pass").value;
     const rememberMe = document.getElementById("remember").checked;
-
     let valid = true;
 
     if (!username) {
@@ -27,7 +26,6 @@ async function handleLogin() {
     } else {
         localStorage.removeItem("rememberedUsername");
     }
-
     try {
         const response = await fetch("http://localhost:8080/login", {
             method: "POST",
@@ -38,9 +36,10 @@ async function handleLogin() {
         });
 
         const result = await response.json();
-
         if (response.ok) {
-            window.location.href = "message.html";
+            sessionStorage.setItem("username", username);
+            sessionStorage.setItem("password", password);
+            window.location.replace("message.html");
         } else {
             showError(document.getElementById("pass"), result.message);
         }

@@ -12,6 +12,8 @@ body {
     background-color: #FFF;
     box-shadow: 0 10px 20px rgba(0,0,0,0.19), 0 6px 6px rgba(0,0,0,0.23);
     height: 700px;
+    position: absolute;
+    top: 0;
 }
 
 /* ===== MENU ===== */
@@ -135,9 +137,14 @@ body {
     background-repeat: no-repeat;
 }
 
-.discussion.message-active {
-    overflow: auto;
+.discussions, .messages-chat {
+    overflow: scroll;
 }
+
+.messages-chat {
+    max-height: 530px;
+}
+
 
 .online {
     position: relative;

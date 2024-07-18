@@ -74,6 +74,7 @@ public class Controller {
 
     @PostMapping("/newchat")
     public ResponseEntity<Chat> newChat(@RequestBody ChatRequest chatRequest) {
+        // this function is used for both creating a new chat object and connecting to an existing chat object
         User recipientUser = new User();
         recipientUser.setUsername(chatRequest.getRecipient());
         Chat chat = messagingService.connectToChat(chatRequest.getUser(), recipientUser);
@@ -89,6 +90,22 @@ public class Controller {
             "recipient": "user2"
         }
      */
+
+    @PostMapping("/chatlist")
+    public ResponseEntity<List<User>> chatList(@RequestBody User user) {
+        List<User> userList = messagingService.getUserList(user);
+        return ResponseEntity.ok(userList);
+    }
+    /* address: localhost:8080/chatlist
+        sample json to send in postman
+        {
+            "username": "user1",
+            "password": "user1"
+        }
+     */
+
+
+
 
     @PostMapping("/hello")
     public ResponseEntity<String> hello() {

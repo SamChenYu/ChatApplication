@@ -165,6 +165,13 @@ body {
     text-overflow: ellipsis;
 }
 
+.discussions .discussion .currentChatName {
+    margin: 0 0 0 20px;
+    font-family:'Montserrat', sans-serif;
+    font-size: 11pt;
+    color:#515151;
+}
+
 .discussions .discussion .name {
     margin: 0 0 0 20px;
     font-family:'Montserrat', sans-serif;
@@ -206,6 +213,14 @@ body {
     margin-left: 30px;
     color:#515151;
     font-size: 14pt;
+}
+
+.chat .header-chat .currentChatName {
+    margin: 0 0 0 20px;
+    text-transform: uppercase;
+    font-family:'Montserrat', sans-serif;
+    font-size: 13pt;
+    color:#515151;
 }
 
 .chat .header-chat .name {

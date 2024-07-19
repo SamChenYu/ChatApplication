@@ -57,7 +57,7 @@ public class Controller {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
         // sends the message to the socket
-        simpMessagingTemplate.convertAndSend("/topic/" + message.getChatID(), message);
+        simpMessagingTemplate.convertAndSend("/topic/" + message.getChatID(), chat);
         return ResponseEntity.ok(chat);
     }
 

@@ -77,7 +77,7 @@ public class ChatStorage {
         Message message3 = new Message();
         message3.setFrom("user1");
         message3.setRecipient("user3");
-        message3.setText("Hello");
+        message3.setText("wassup");
         message3.setTime("12:00");
         message3.setChatID(chatID);
 
@@ -86,7 +86,7 @@ public class ChatStorage {
         Message message4 = new Message();
         message4.setFrom("user3");
         message4.setRecipient("user1");
-        message4.setText("Hi");
+        message4.setText("bro");
         message4.setTime("12:01");
         message4.setChatID(chatID);
 

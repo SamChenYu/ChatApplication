@@ -118,7 +118,7 @@ public class ChatStorage {
 
 
     public Chat getChat(User user1, User user2) {
-
+        // under the presumption that the two users exist already
         for (Chat chat : chats) {
             boolean user1Found = false;
             boolean user2Found = false;
@@ -135,7 +135,9 @@ public class ChatStorage {
             }
         }
 
-        return newChat(user1, user2);
+        Chat newChat = newChat(user1, user2);
+        chats.add(newChat);
+        return newChat;
     }
 
     public Chat newChat(User user1, User user2) {

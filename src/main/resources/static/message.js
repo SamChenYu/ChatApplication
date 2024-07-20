@@ -1,5 +1,8 @@
 const username = sessionStorage.getItem("username");
 const password = sessionStorage.getItem("password");
+
+
+
 let currentChatID = null;
 let currentRecipient = null;
 
@@ -20,6 +23,15 @@ function main() {
         }
     });
 
+    const searchButton = document.querySelector('.discussions .discussion.search .searchbar input');
+    searchButton.addEventListener('keypress', (event) => {
+        if(event.key === 'Enter') {
+            const searchValue = searchButton.value;
+            searchUsers(searchValue);
+            searchButton.value = '';
+        }
+    });
+
 }
 
 
@@ -37,7 +49,9 @@ function main() {
 
 
 async function loadChats() {
-    // get the list of users that the current user has chatted with
+    // FETCHES list of users from server that user has active chats with
+    // It sends the username and password to the server
+    // After that is displays the chat on the UI
     try {
         const response = await fetch("http://localhost:8080/chatlist", {
             method: "POST",
@@ -49,7 +63,6 @@ async function loadChats() {
 
         const result = await response.json();
         if (response.ok) {
-            console.log(result);
             displayChats(result);
         } else {
             alert(result.message);
@@ -62,11 +75,24 @@ async function loadChats() {
 
 function displayChats(users) {
     // displays the chats on the browser
+    // Expects an array of users that has active chats
+    // The first user in the array will have their chat messages loaded
+
     let usersDisplayed = 0;
 
     const chatList = document.querySelector('.discussions');
-    // Loop through the users and create the necessary elements
+    // clear the chat list by removing all divs with dummy tag
+    const dummyDivs = document.querySelectorAll('.discussion.dummy');
+    dummyDivs.forEach(div => {
+        div.remove();
+    });
 
+
+
+
+
+
+    // Loop through the users and create the necessary elements
     /*
         Form for the chats card
         <div class=discussion>
@@ -88,9 +114,9 @@ function displayChats(users) {
         });
 
          if(usersDisplayed === 0) {
-             userDiv.classList.add('discussion', 'message-active');
+             userDiv.classList.add('discussion', 'message-active', 'dummy');
          } else {
-             userDiv.classList.add('discussion');
+             userDiv.classList.add('discussion', 'dummy');
          }
 
          const descContactDiv = document.createElement('div');
@@ -119,10 +145,10 @@ function displayChats(users) {
     });
 
 
-     // add empty chat cards to fill up the space
+     // add dummy chat cards to fill up the blank space
     for (let i = usersDisplayed; i < 7; i++) {
         const userDiv = document.createElement('div');
-        userDiv.classList.add('discussion');
+        userDiv.classList.add('discussion', 'dummy');
 
         const descContactDiv = document.createElement('div');
         descContactDiv.classList.add('desc-contact');
@@ -145,8 +171,15 @@ function displayChats(users) {
 }
 
 
+
+
+
+
 async function loadMessages(recipient) {
-    // get the messages between the current user and the recipient from the server
+    // FETCHES messages from the server from a single chat
+    // It expects the username, password and the recipient
+    // An array of messages is returned
+    // It then displays the messages on the UI
     try {
         const response = await fetch("http://localhost:8080/newchat", {
             method: "POST",
@@ -167,7 +200,6 @@ async function loadMessages(recipient) {
         if (response.ok) {
             clearChat();
             currentChatID = result.chatID;
-            console.log("Current recipient: ", currentRecipient, "Current chatID: ", currentChatID);
             connectToSocket(currentChatID);
             displayMessages(result, recipient); // do not change to currentRecipient
             return result;
@@ -183,7 +215,9 @@ async function loadMessages(recipient) {
 
 function displayMessages(response, recipient) {
 
-    //displays the messages on the browser
+    // displays the messages on the browser
+    // it expects an array of messages
+    // the reason is has recipient as a parameter is to change the recipient name on the chat window
 
     /*
         FORM for the message from the other user
@@ -266,6 +300,11 @@ function clearChat() {
 
 
 async function sendMessage() {
+
+    // sends a message to the server
+    // expects the message to be sent to the current recipient
+    // it then displays the message on the UI after receiving response from the server web socket
+
     const messageInput = document.querySelector('.write-message');
     const message = messageInput.value;
     messageInput.value = '';
@@ -310,9 +349,7 @@ async function sendMessage() {
     const now = new Date();
     const hours = now.getHours().toString().padStart(2, '0');
     const minutes = now.getMinutes().toString().padStart(2, '0');
-    const currentTime = `${hours}:${minutes}`;
-    console.log("Sending message to: ", currentRecipient, " with chatID: ", currentChatID);
-    try {
+    const currentTime = `${hours}:${minutes}`;try {
         const response = await fetch("http://localhost:8080/sendmessage", {
             method: "POST",
             headers: {
@@ -327,7 +364,6 @@ async function sendMessage() {
                     chatID:  currentChatID
                 })
         });
-        console.log("RESPONSE!!!!" + response.recipient);
         const result = await response.json();
         if (response.ok) {
             clearChat();
@@ -340,6 +376,132 @@ async function sendMessage() {
 
     }
 
+
+}
+
+
+async function searchUsers(searchValue) {
+
+    // search for a user to create a new chat with
+    // it sends the search value to the server
+    // a chat is created if the user is found
+    // a chat object is returned to display
+
+    const data = {
+        user: {
+            username: username,
+            password: password
+        },
+        recipient: searchValue
+    };
+    try {
+        const response = await fetch("http://localhost:8080/newchat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            //loadChats(); // reload the chats
+            //displayMessages(result, searchValue);
+        } else {
+            alert(result.message);
+        }
+    } catch (error) {
+        alert("User not found. Try again.");
+
+    }
+}
+
+
+
+function chatSocketUpdate(users) {
+    // this function is almost exactly the same as displayChats but the difference is that it does not load the messages
+    // if you use displayChats with the socket it causes an infinite loop
+    // display chats will call loading messages which will make the socket update the chat window which then calls this function again
+
+    let usersDisplayed = 0;
+
+    const chatList = document.querySelector('.discussions');
+    // clear the chat list by removing all divs with dummy tag
+    const dummyDivs = document.querySelectorAll('.discussion.dummy');
+    dummyDivs.forEach(div => {
+        div.remove();
+    });
+
+    // Loop through the users and create the necessary elements
+    /*
+        Form for the chats card
+        <div class=discussion>
+            <div class="desc-contact">
+                <p class="name">Megan Leib</p>
+            </div>
+            <div class="timer">12 sec</div>
+        </div>
+     */
+    users.forEach(user => {
+
+        const userDiv = document.createElement('div');
+        userDiv.addEventListener('click', () => {
+            // add event listeners to load in the new messages
+            clearChat();
+            currentRecipient = user.username;
+            loadMessages(currentRecipient);
+
+        });
+
+        if(usersDisplayed === 0) {
+            userDiv.classList.add('discussion', 'message-active', 'dummy');
+        } else {
+            userDiv.classList.add('discussion', 'dummy');
+        }
+
+        const descContactDiv = document.createElement('div');
+        descContactDiv.classList.add('desc-contact');
+
+        const namePara = document.createElement('p');
+        namePara.classList.add('name');
+        namePara.textContent = user.username;
+
+        const timerDiv = document.createElement('div');
+        timerDiv.classList.add('timer');
+        timerDiv.textContent = '12 sec';
+
+        userDiv.appendChild(descContactDiv);
+        descContactDiv.appendChild(namePara);
+        userDiv.appendChild(timerDiv);
+
+        chatList.appendChild(userDiv);
+
+        usersDisplayed++;
+    });
+
+
+    // add dummy chat cards to fill up the blank space
+    for (let i = usersDisplayed; i < 7; i++) {
+        const userDiv = document.createElement('div');
+        userDiv.classList.add('discussion', 'dummy');
+
+        const descContactDiv = document.createElement('div');
+        descContactDiv.classList.add('desc-contact');
+
+        const namePara = document.createElement('p');
+        namePara.classList.add('name');
+        namePara.textContent = '';
+
+        const timerDiv = document.createElement('div');
+        timerDiv.classList.add('timer');
+        timerDiv.textContent = '';
+
+        userDiv.appendChild(descContactDiv);
+        descContactDiv.appendChild(namePara);
+        userDiv.appendChild(timerDiv);
+
+        chatList.appendChild(userDiv);
+    }
 
 }
 

@@ -76,8 +76,29 @@ public class Controller {
     public ResponseEntity<Chat> newChat(@RequestBody ChatRequest chatRequest) {
         // this function is used for both creating a new chat object and connecting to an existing chat object
         User recipientUser = new User();
-        recipientUser.setUsername(chatRequest.getRecipient());
+        recipientUser.setUsername(chatRequest.getRecipient()); // i think this is the issue
         Chat chat = messagingService.connectToChat(chatRequest.getUser(), recipientUser);
+
+        if(chat == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+
+        // to prevent an infinite loop of notifications, we should only send the notification if the chat is new
+        if(chat.getMessages().isEmpty()) {
+            System.out.println("update chats sent for " + recipientUser.getUsername());
+            // this is a little complicated because we are sending this to displayChats() which takes a user array but we are returning a chat here
+            // now a chat object is either returned or created. if it is created, the other users need to be notified
+            // sends the chat to the socket
+            List<User> userList = messagingService.getUserList(recipientUser);
+            System.out.println(userList);
+            simpMessagingTemplate.convertAndSend("/topic/chatlist/" + recipientUser.getUsername(), userList);
+            // send out to the current user too
+
+            userList = messagingService.getUserList(chatRequest.getUser());
+            simpMessagingTemplate.convertAndSend("/topic/chatlist/" + chatRequest.getUser().getUsername(), userList);
+        }
+
         return ResponseEntity.ok(chat);
     }
     /* address: localhost:8080/newchat

@@ -21,6 +21,10 @@ public class MessagingService {
     private final ChatStorage chatStorage = ChatStorage.getInstance();
 
     public Chat connectToChat(User user1, User user2) {
+        // check if the users exist in the first place
+        if (!userStorage.getInstance().userExists(user1) || !userStorage.getInstance().userExists(user2)) {
+            return null;
+        }
         Chat chat = chatStorage.getInstance().getChat(user1, user2);
         return chat;
     }
@@ -36,7 +40,7 @@ public class MessagingService {
         for (Chat chat : chats) {
             List<User> participants = chat.getParticipants();
             for (User participant : participants) {
-                if (!participant.equals(user)) {
+                if (!participant.getUsername().equals(user.getUsername())) {
                     users.add(participant);
                 }
             }

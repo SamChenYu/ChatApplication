@@ -23,10 +23,15 @@ public class UserStorage {
         user3.setUsername("user3");
         user3.setPassword("user3");
 
+        User user4 = new User();
+        user4.setUsername("user4");
+        user4.setPassword("user4");
+
 
         users.add(user1);
         users.add(user2);
         users.add(user3);
+        users.add(user4);
     }
 
     public static synchronized UserStorage getInstance() {
@@ -39,6 +44,16 @@ public class UserStorage {
     public boolean login(String username, String password) {
         for (User user : users) {
             if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean userExists(User user) {
+        String checkUsername = user.getUsername();
+        for (User u : users) {
+            if (u.getUsername().equals(checkUsername)) {
                 return true;
             }
         }

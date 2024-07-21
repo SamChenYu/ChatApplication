@@ -25,11 +25,8 @@
   - Users can connect, disconnect, and switch between different chat sessions.
 
 ### Technologies Used:
-- **Backend:** Spring Boot, Spring WebSocket
 - **Frontend:** JavaScript, SockJS, STOMP
-### Installation and Usage:
-- Step-by-step guide to clone, build, and run the application.
-- How to configure and start the server and client.
+- **Backend:** Spring Boot, Spring WebSocket
 
 [Front End Login Design](https://codepen.io/Gogila-_/pen/VwJYqxB)  
 [Front End Chat Design](https://codepen.io/ThomasDaubenton/pen/QMqaBN)

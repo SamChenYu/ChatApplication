@@ -269,10 +269,23 @@ body {
     margin-left: 45px;
 }
 
+
+.message .time {
+    float: left;
+    margin-left: -10px;
+    margin-right: auto;
+    margin-bottom: -10px;
+    margin-top: auto;
+}
+
+.response .time {
+
+}
+
 .time {
     font-size: 10px;
     color:lightgrey;
-    margin-bottom:10px;
+    margin-bottom:0px;
     margin-left: 85px;
 }
 
@@ -286,6 +299,8 @@ body {
     margin-right: 0px !important;
     margin-left:auto; /* flexbox alignment rule */
 }
+
+
 
 .response .text {
     background-color: #e3effd !important;

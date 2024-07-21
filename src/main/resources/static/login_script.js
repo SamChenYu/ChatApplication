@@ -1,4 +1,12 @@
 
+const passwordField = document.getElementById("pass");
+
+passwordField.addEventListener('keypress', (event) => {
+    if(event.key === 'Enter') {
+        handleLogin();
+    }
+});
+
 async function handleLogin() {
     clearErrors();
 
@@ -80,15 +88,13 @@ async function handleRegister() {
     }
 
     try {
-        const response = await fetch("/register", {
+        const response = await fetch("http://localhost:8080/adduser", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify({ username, email, password })
         });
-
-        const result = await response.json();
 
         if (response.ok) {
             alert("Registration successful");

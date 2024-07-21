@@ -16,7 +16,7 @@ function connectToSocket(currentChatID) {
             stompClient.subscribe("/topic/" + currentChatID, function (response) {
                 let data = JSON.parse(response.body);
                 clearChat();
-                displayMessages(data);
+                displayMessages(data, currentRecipient);
             });
         }
 

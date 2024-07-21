@@ -57,6 +57,7 @@ public class Controller {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
         // sends the message to the socket
+
         simpMessagingTemplate.convertAndSend("/topic/" + message.getChatID(), chat);
         return ResponseEntity.ok(chat);
     }
@@ -124,6 +125,13 @@ public class Controller {
             "password": "user1"
         }
      */
+
+    @PostMapping("/adduser")
+    public ResponseEntity<Void> addUser(@RequestBody User user) {
+        messagingService.addUser(user);
+        System.out.println("user added");
+        return ResponseEntity.ok().build();
+    }
 
 
 

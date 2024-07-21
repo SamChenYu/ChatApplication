@@ -9,6 +9,8 @@ let currentRecipient = null;
 main();
 
 function main() {
+
+    document.title = "Messages: " + username;
     loadChats();
     // loadChat -> displayChats -> loadMessages of first user -> displayMessages of first user
 
@@ -30,6 +32,14 @@ function main() {
             searchUsers(searchValue);
             searchButton.value = '';
         }
+    });
+
+    const searchIcon = document.querySelector('.fa.fa-search');
+
+    searchIcon.addEventListener('click', () => {
+        const searchValue = searchButton.value;
+        searchUsers(searchValue);
+        searchButton.value = '';
     });
 
 }
@@ -224,6 +234,7 @@ function displayMessages(response, recipient) {
           <div class="message text-only">
             <div class="message">
               <p class="text"> Hey Megan ! It's been a while 😃</p>
+                <p class="time">12:00</p>
             </div>
           </div>
 
@@ -231,6 +242,7 @@ function displayMessages(response, recipient) {
           <div class="message text-only">
             <div class="response">
               <p class="text"> When can we meet ?</p>
+              <p class="time">12:00</p>
             </div>
           </div>
      */
@@ -240,6 +252,8 @@ function displayMessages(response, recipient) {
 
     const nameTag = document.querySelector('.currentChatName');
     nameTag.textContent = recipient;
+
+    const messagesContainer = document.querySelector('.messages-chat');
     response.messages.forEach(message => {
 
         if(message.from === username) {
@@ -247,38 +261,52 @@ function displayMessages(response, recipient) {
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message', 'text-only');
 
-            const responseDiv = document.createElement('div');
-            responseDiv.classList.add('response');
+            const messageContentDiv = document.createElement('div');
+            messageContentDiv.classList.add('response');
 
 
             const textPara = document.createElement('p');
             textPara.classList.add('text');
             textPara.textContent = message.text;
 
+            const timePara = document.createElement('p');
+            timePara.classList.add('time');
+            timePara.textContent = message.time;
 
-            responseDiv.appendChild(textPara);
-            messageDiv.appendChild(responseDiv);
 
-            document.querySelector('.messages-chat').appendChild(messageDiv);
+            messageContentDiv.appendChild(textPara);
+            messageContentDiv.appendChild(timePara);
+            messageDiv.appendChild(messageContentDiv);
+
+
+            messagesContainer.appendChild(messageDiv);
         } else {
             // this is a message from the other user
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message', 'text-only');
 
-            const messageDiv2 = document.createElement('div');
-            messageDiv2.classList.add('message');
+            const messageContentDiv = document.createElement('div');
+            messageContentDiv.classList.add('message');
 
 
             const textPara = document.createElement('p');
             textPara.classList.add('text');
             textPara.textContent = message.text;
 
-            messageDiv2.appendChild(textPara);
-            messageDiv.appendChild(messageDiv2);
+            const timePara = document.createElement('p');
+            timePara.classList.add('time');
+            timePara.textContent = message.time;
 
-            document.querySelector('.messages-chat').appendChild(messageDiv);
+
+            messageContentDiv.appendChild(textPara);
+            messageContentDiv.appendChild(timePara);
+            messageDiv.appendChild(messageContentDiv);
+
+
+            messagesContainer.appendChild(messageDiv);
         }
-
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        // scroll to the bottom of the chat for the most recent messages
     });
 }
 
@@ -432,6 +460,8 @@ function chatSocketUpdate(users) {
         div.remove();
     });
 
+    const nameTag = document.querySelector('.currentChatName');;
+
     // Loop through the users and create the necessary elements
     /*
         Form for the chats card
@@ -492,13 +522,10 @@ function chatSocketUpdate(users) {
         namePara.classList.add('name');
         namePara.textContent = '';
 
-        const timerDiv = document.createElement('div');
-        timerDiv.classList.add('timer');
-        timerDiv.textContent = '';
 
         userDiv.appendChild(descContactDiv);
         descContactDiv.appendChild(namePara);
-        userDiv.appendChild(timerDiv);
+
 
         chatList.appendChild(userDiv);
     }

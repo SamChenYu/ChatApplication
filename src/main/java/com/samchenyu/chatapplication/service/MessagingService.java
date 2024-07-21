@@ -58,6 +58,10 @@ public class MessagingService {
         return chat;
     }
 
+    public void addUser(User user) {
+        userStorage.getInstance().addUser(user);
+    }
+
     public UserStorage getUserStorage() {
         return userStorage.getInstance();
     }

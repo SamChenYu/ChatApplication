@@ -125,9 +125,11 @@ public class ChatStorage {
             for(User participant : chat.getParticipants()) {
                 if (participant.getUsername().equals(user1.getUsername())) {
                     user1Found = true;
+                    continue;
                 }
                 if (participant.getUsername().equals(user2.getUsername())) {
                     user2Found = true;
+                    continue;
                 }
             }
             if (user1Found && user2Found) {

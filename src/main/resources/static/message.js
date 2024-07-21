@@ -1,7 +1,9 @@
 const username = sessionStorage.getItem("username");
 const password = sessionStorage.getItem("password");
 
-
+if(username == null || password == null) {
+    window.location.href = "index.html";
+}
 
 let currentChatID = null;
 let currentRecipient = null;
@@ -11,9 +13,9 @@ main();
 function main() {
 
     document.title = "Messages: " + username;
-    loadChats();
-    // loadChat -> displayChats -> loadMessages of first user -> displayMessages of first user
+    loadChats().then(r => { loadMessages(false); });
 
+    // Add event listeners to buttons
     const sendButton = document.querySelector('.icon.send.fa.fa-paper-plane-o.clickable');
     sendButton.addEventListener('click', () => {
         sendMessage();
@@ -44,24 +46,11 @@ function main() {
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 async function loadChats() {
     // FETCHES list of users from server that user has active chats with
-    // It sends the username and password to the server
-    // After that is displays the chat on the UI
+    // PAYLOAD: User object {username, password}
+    // EXPECTED RESPONSE: Array of users
+    // Calls displayChats() to display the chats on the UI
     try {
         const response = await fetch("http://localhost:8080/chatlist", {
             method: "POST",
@@ -73,33 +62,29 @@ async function loadChats() {
 
         const result = await response.json();
         if (response.ok) {
-            displayChats(result);
+            displayChats(result, false);
         } else {
             alert(result.message);
         }
     } catch (error) {
         alert("Something went wrong in loadChats(). Please try again.");
-
     }
 }
 
-function displayChats(users) {
-    // displays the chats on the browser
-    // Expects an array of users that has active chats
-    // The first user in the array will have their chat messages loaded
+function displayChats(users, isSocketUpdate) {
 
-    let usersDisplayed = 0;
+    // Displays the chats on the browser
+    // PARAMS: An array of users,
+    //      isSocketUpdate: used to determine how the active chat is displayed
+    //      TRUE: The active chat will be for the first recipient user in the list
+    //      FALSE: The active chat messages will be loaded based on the currentRecipient
 
+    let usersDisplayed = 0; // used to add dummy chat cards to fill up the blank space
     const chatList = document.querySelector('.discussions');
-    // clear the chat list by removing all divs with dummy tag
     const dummyDivs = document.querySelectorAll('.discussion.dummy');
     dummyDivs.forEach(div => {
-        div.remove();
+        div.remove(); // clear the chat list by removing all divs with dummy tag
     });
-
-
-
-
 
 
     // Loop through the users and create the necessary elements
@@ -115,20 +100,26 @@ function displayChats(users) {
      users.forEach(user => {
 
         const userDiv = document.createElement('div');
-        userDiv.addEventListener('click', () => {
-            // add event listeners to load in the new messages
-            clearChat();
-            currentRecipient = user.username;
-            loadMessages(currentRecipient);
-
-        });
-
-         if(usersDisplayed === 0) {
-             userDiv.classList.add('discussion', 'message-active', 'dummy');
+         if( (usersDisplayed === 0 && currentRecipient == null && !isSocketUpdate) || currentRecipient === user.username) {
+             // (usersDisplayed === 0 && currentRecipient == null && !isSocketUpdate) -> this is the first chat to be displayed during initial load
+             // currentRecipient === user.username -> a new chat was created but the user already had a chat with this user before (socket update)
+             currentRecipient = user.username;
+             userDiv.classList.add('discussion', 'message-active', 'dummy'); // make the current user chat active
          } else {
              userDiv.classList.add('discussion', 'dummy');
          }
-
+        userDiv.addEventListener('click', () => {
+            // Loading a chat of a user
+            clearChat();
+            currentRecipient = user.username;
+            loadMessages(false);
+            const activeChats = document.querySelectorAll('.discussion.message-active');
+            activeChats.forEach(chat => {
+                chat.classList.remove('message-active'); // Make sure that there are no other active chats
+            });
+            userDiv.classList.add('message-active');
+        });
+         // Create the necessary elements
          const descContactDiv = document.createElement('div');
          descContactDiv.classList.add('desc-contact');
 
@@ -138,7 +129,7 @@ function displayChats(users) {
 
         const timerDiv = document.createElement('div');
         timerDiv.classList.add('timer');
-        timerDiv.textContent = '12 sec';
+        timerDiv.textContent = '12 sec'; // Todo: Add the time of the last message
 
         userDiv.appendChild(descContactDiv);
         descContactDiv.appendChild(namePara);
@@ -146,16 +137,11 @@ function displayChats(users) {
 
          chatList.appendChild(userDiv);
 
-         if(usersDisplayed === 0) {
-            // we will load the chat messages for the first user
-            loadMessages(user.username);
-         }
-
          usersDisplayed++;
     });
 
 
-     // add dummy chat cards to fill up the blank space
+     // Add dummy chat cards to fill up the blank space
     for (let i = usersDisplayed; i < 7; i++) {
         const userDiv = document.createElement('div');
         userDiv.classList.add('discussion', 'dummy');
@@ -177,21 +163,24 @@ function displayChats(users) {
 
         chatList.appendChild(userDiv);
     }
-
 }
 
-
-
-
-
-
-async function loadMessages(recipient) {
+async function loadMessages(isSocketUpdate) {
     // FETCHES messages from the server from a single chat
-    // It expects the username, password and the recipient
-    // An array of messages is returned
-    // It then displays the messages on the UI
+    // PARAM:   isSocketUpdate -> if it's a socket update, we are sure the chat exists, therefore we can call the
+    //          /loadchat endpoint. If it's not a socket update, we need to check if the chat already exists
+    //          with /newchat instead
+    // PAYLOAD: User object {username, password} and recipient
+    // EXPECTED RESPONSE: An array of messages
+    // Calls displayMessages to display the messages on the UI
+
+    if(currentRecipient === null) return;
+
+    // /newchat -> not sure if the chat exists (user searching)
+    // /loadchat -> received from socket therefore chat exists
+    const url = isSocketUpdate ? "http://localhost:8080/newchat" : "http://localhost:8080/loadchat";
     try {
-        const response = await fetch("http://localhost:8080/newchat", {
+        const response = await fetch(url, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -201,7 +190,7 @@ async function loadMessages(recipient) {
                     username: username,
                     password: password
                 },
-                recipient: recipient // do not change this to currentRecipient
+                recipient: currentRecipient
             })
         });
 
@@ -209,9 +198,9 @@ async function loadMessages(recipient) {
         const result = await response.json();
         if (response.ok) {
             clearChat();
+            displayMessages(result);
             currentChatID = result.chatID;
-            connectToSocket(currentChatID);
-            displayMessages(result, recipient); // do not change to currentRecipient
+            connectToMessageSocket(currentChatID);
             return result;
         } else {
             console.error("Request failed:", result.message);
@@ -221,19 +210,16 @@ async function loadMessages(recipient) {
     }
 }
 
+function displayMessages(response) {
 
-
-function displayMessages(response, recipient) {
-
-    // displays the messages on the browser
-    // it expects an array of messages
-    // the reason is has recipient as a parameter is to change the recipient name on the chat window
+    // Displays the messages on the browser
+    // PARAMS: An array of messages
 
     /*
         FORM for the message from the other user
           <div class="message text-only">
             <div class="message">
-              <p class="text"> Hey Megan ! It's been a while 😃</p>
+              <p class="text"> Hey Megan ! It's been a while</p>
                 <p class="time">12:00</p>
             </div>
           </div>
@@ -251,93 +237,47 @@ function displayMessages(response, recipient) {
 
 
     const nameTag = document.querySelector('.currentChatName');
-    nameTag.textContent = recipient;
+    nameTag.textContent = currentRecipient;
 
     const messagesContainer = document.querySelector('.messages-chat');
     response.messages.forEach(message => {
 
-        if(message.from === username) {
-            // this is a message from the current user
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message', 'text-only');
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', 'text-only');
 
-            const messageContentDiv = document.createElement('div');
-            messageContentDiv.classList.add('response');
+        const messageContentDiv = document.createElement('div');
+        const messageContentDivClass = message.from === username ? 'response' : 'message'; // check if the message is from the current user to change the styling
+        messageContentDiv.classList.add(messageContentDivClass);
 
+        const textPara = document.createElement('p');
+        textPara.classList.add('text');
+        textPara.textContent = message.text;
 
-            const textPara = document.createElement('p');
-            textPara.classList.add('text');
-            textPara.textContent = message.text;
+        const timePara = document.createElement('p');
+        timePara.classList.add('time');
+        timePara.textContent = message.time;
 
-            const timePara = document.createElement('p');
-            timePara.classList.add('time');
-            timePara.textContent = message.time;
+        messageContentDiv.appendChild(textPara);
+        messageContentDiv.appendChild(timePara);
+        messageDiv.appendChild(messageContentDiv);
 
+        messagesContainer.appendChild(messageDiv);
 
-            messageContentDiv.appendChild(textPara);
-            messageContentDiv.appendChild(timePara);
-            messageDiv.appendChild(messageContentDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight; // scroll to the bottom of the chat for the most recent messages
 
-
-            messagesContainer.appendChild(messageDiv);
-        } else {
-            // this is a message from the other user
-            const messageDiv = document.createElement('div');
-            messageDiv.classList.add('message', 'text-only');
-
-            const messageContentDiv = document.createElement('div');
-            messageContentDiv.classList.add('message');
-
-
-            const textPara = document.createElement('p');
-            textPara.classList.add('text');
-            textPara.textContent = message.text;
-
-            const timePara = document.createElement('p');
-            timePara.classList.add('time');
-            timePara.textContent = message.time;
-
-
-            messageContentDiv.appendChild(textPara);
-            messageContentDiv.appendChild(timePara);
-            messageDiv.appendChild(messageContentDiv);
-
-
-            messagesContainer.appendChild(messageDiv);
-        }
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        // scroll to the bottom of the chat for the most recent messages
     });
 }
 
-
-
-
-function clearChat() {
-    const messagesChat = document.querySelector('.messages-chat');
-    messagesChat.innerHTML = '';
-}
-
-
-
-
-
-
-
-
-
-
 async function sendMessage() {
 
-    // sends a message to the server
-    // expects the message to be sent to the current recipient
-    // it then displays the message on the UI after receiving response from the server web socket
+    // Sends a message to the server
+    // Message will be sent to the currentRecipient
+    // PAYLOAD: Message object {from, recipient, text, time, chatID}
+    // The web socket will update the chat after the message is sent
 
     const messageInput = document.querySelector('.write-message');
     const message = messageInput.value;
     messageInput.value = '';
-
-
 
     if(message.length === 0 || (currentChatID == null && currentRecipient == null)) {
         return;
@@ -359,11 +299,8 @@ async function sendMessage() {
 
     document.querySelector('.messages-chat').appendChild(messageDiv);
     */
-    // send the message to the server
-    //sendMessageToServer(message, recipient);
 
-
-    // send the message to the server
+    // Send the message to the server
     /*
         JSON TEMPLATE to send a message
         {
@@ -401,19 +338,28 @@ async function sendMessage() {
         }
     } catch (error) {
         alert("Something went wrong in sendMessage(). Please try again.");
-
     }
-
-
 }
-
 
 async function searchUsers(searchValue) {
 
-    // search for a user to create a new chat with
-    // it sends the search value to the server
-    // a chat is created if the user is found
-    // a chat object is returned to display
+    // Search for a user to create a new chat with
+    // PARAMS: username to search for
+    // PAYLOAD: User object {username, password} and recipient
+    // A chat is created if the user is found
+    // EXPECTED RESPONSE: NONE - the socket will update the chat list
+
+    /*
+        The Server will receive a request for the new chat with a username.
+        If the username exists, then it will update the socket before returning HTTP ok.
+        This is why we pre-emptively update the currentRecipient to the searchValue
+
+        If the username does not exist, then it will return HTTP bad request before the socket,
+        then we know to immediately change the currentRecipient back to the previous recipient
+     */
+
+    const previousRecipient = currentRecipient;
+    currentRecipient = searchValue;
 
     const data = {
         user: {
@@ -433,102 +379,19 @@ async function searchUsers(searchValue) {
 
         const result = await response.json();
         if (response.ok) {
-            //loadChats(); // reload the chats
-            //displayMessages(result, searchValue);
+            //currentRecipient = searchValue;
         } else {
             alert(result.message);
         }
     } catch (error) {
         alert("User not found. Try again.");
-
+        currentRecipient = previousRecipient; // Revert the recipient back to the previous recipient
     }
 }
 
-
-
-function chatSocketUpdate(users) {
-    // this function is almost exactly the same as displayChats but the difference is that it does not load the messages
-    // if you use displayChats with the socket it causes an infinite loop
-    // display chats will call loading messages which will make the socket update the chat window which then calls this function again
-
-    let usersDisplayed = 0;
-
-    const chatList = document.querySelector('.discussions');
-    // clear the chat list by removing all divs with dummy tag
-    const dummyDivs = document.querySelectorAll('.discussion.dummy');
-    dummyDivs.forEach(div => {
-        div.remove();
-    });
-
-    const nameTag = document.querySelector('.currentChatName');;
-
-    // Loop through the users and create the necessary elements
-    /*
-        Form for the chats card
-        <div class=discussion>
-            <div class="desc-contact">
-                <p class="name">Megan Leib</p>
-            </div>
-            <div class="timer">12 sec</div>
-        </div>
-     */
-    users.forEach(user => {
-
-        const userDiv = document.createElement('div');
-        userDiv.addEventListener('click', () => {
-            // add event listeners to load in the new messages
-            clearChat();
-            currentRecipient = user.username;
-            loadMessages(currentRecipient);
-
-        });
-
-        if(usersDisplayed === 0) {
-            userDiv.classList.add('discussion', 'message-active', 'dummy');
-        } else {
-            userDiv.classList.add('discussion', 'dummy');
-        }
-
-        const descContactDiv = document.createElement('div');
-        descContactDiv.classList.add('desc-contact');
-
-        const namePara = document.createElement('p');
-        namePara.classList.add('name');
-        namePara.textContent = user.username;
-
-        const timerDiv = document.createElement('div');
-        timerDiv.classList.add('timer');
-        timerDiv.textContent = '12 sec';
-
-        userDiv.appendChild(descContactDiv);
-        descContactDiv.appendChild(namePara);
-        userDiv.appendChild(timerDiv);
-
-        chatList.appendChild(userDiv);
-
-        usersDisplayed++;
-    });
-
-
-    // add dummy chat cards to fill up the blank space
-    for (let i = usersDisplayed; i < 7; i++) {
-        const userDiv = document.createElement('div');
-        userDiv.classList.add('discussion', 'dummy');
-
-        const descContactDiv = document.createElement('div');
-        descContactDiv.classList.add('desc-contact');
-
-        const namePara = document.createElement('p');
-        namePara.classList.add('name');
-        namePara.textContent = '';
-
-
-        userDiv.appendChild(descContactDiv);
-        descContactDiv.appendChild(namePara);
-
-
-        chatList.appendChild(userDiv);
-    }
-
+function clearChat() {
+    // Clears the chat window messages to reload new messages
+    const messagesChat = document.querySelector('.messages-chat');
+    messagesChat.innerHTML = '';
 }
 

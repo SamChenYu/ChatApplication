@@ -29,6 +29,8 @@ public class MessagingService {
         return chat;
     }
 
+
+
     public List<Chat> getChatList(User user) {
         return chatStorage.getInstance().getChatList(user);
     }

@@ -103,6 +103,7 @@ public class ChatStorage {
 
 
     public List<Chat> getChatList(User user) {
+        // Returns the list of chats that the user is a participant of
         List<Chat> userChats = new ArrayList<>();
         String username = user.getUsername();
 

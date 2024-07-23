@@ -7,8 +7,8 @@ import java.util.HashMap;
 
 @Data
 public class User {
+    private String uuid;
     private String email;
     private String username;
     private String password;
-
 }

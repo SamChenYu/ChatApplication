@@ -36,6 +36,7 @@ public class MessagingService {
     }
 
     public List<User> getUserList(User user) {
+        // Returns a list of users that the current user has chats with
         List<Chat> chats = chatStorage.getInstance().getChatList(user);
         List<User> users = new ArrayList<>();
         // for each chat, get the other user
@@ -62,6 +63,13 @@ public class MessagingService {
 
     public void addUser(User user) {
         userStorage.getInstance().addUser(user);
+    }
+
+    public String newUUIDAuth(User user) {
+        String username = user.getUsername();
+        String newUUID = UUID.randomUUID().toString();
+         userStorage.getInstance().setUUID(username, newUUID);
+         return newUUID;
     }
 
     public UserStorage getUserStorage() {

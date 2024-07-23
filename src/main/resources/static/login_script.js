@@ -42,9 +42,11 @@ async function handleLogin() {
             },
             body: JSON.stringify({ username, password })
         });
-
-        const result = await response.json();
+        const result = await response.text();
         if (response.ok) {
+            // Response will contain an Auth Token UUID
+            console.log(result);
+
             sessionStorage.setItem("username", username);
             sessionStorage.setItem("password", password);
             window.location.replace("message.html");

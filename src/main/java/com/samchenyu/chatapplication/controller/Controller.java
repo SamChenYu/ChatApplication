@@ -27,14 +27,14 @@ public class Controller {
 
 
     @PostMapping("/login")
-    public ResponseEntity<List<Chat>> login(@RequestBody User user) {
+    public ResponseEntity<String> login(@RequestBody User user) {
         // User Login Endpoint
         boolean success = messagingService.getUserStorage().login(user.getUsername(), user.getPassword());
 
         if (success) {
-            System.out.println("Login success");
-            List<Chat> chat = messagingService.getChatList(user);
-            return ResponseEntity.ok(chat);
+            String authToken = messagingService.newUUIDAuth(user);
+            System.out.println("login success");
+            return ResponseEntity.ok(authToken);
         } else {
             System.out.println("Login failed");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

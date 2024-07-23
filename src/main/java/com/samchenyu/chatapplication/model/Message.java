@@ -10,6 +10,7 @@ public class Message {
     private String recipient;
     private String time;
     private String chatID;
+    private int messageID; // sequential numbering of chats
 
 
 }

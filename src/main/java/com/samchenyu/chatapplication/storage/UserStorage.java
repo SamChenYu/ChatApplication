@@ -2,40 +2,40 @@ package com.samchenyu.chatapplication.storage;
 
 import com.samchenyu.chatapplication.model.User;
 
-import java.util.List;
-import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.HashMap;
+
 
 public class UserStorage {
 
-    private static List<User> users = new ArrayList<>();
+    private static final HashSet<String> usernameStorage = new HashSet<>();
+    private static final HashMap<String, String> passwordStorage = new HashMap<>();
+    private static final HashMap<String, String> emailStorage = new HashMap<>();
+    private static final HashMap<String, String> UUIDAuthentication = new HashMap<>();
+
+
+
     private static UserStorage instance;
 
     private UserStorage() {
-        User user1 = new User();
-        user1.setUsername("user1");
-        user1.setPassword("user1");
-        user1.setEmail("user1@gmail.com");
 
-        User user2 = new User();
-        user2.setUsername("user2");
-        user2.setPassword("user2");
-        user2.setEmail("user2@gmail.com");
+        usernameStorage.add("user1");
+        passwordStorage.put("user1","user1");
+        emailStorage.put("user1","user1@gmail.com");
 
-        User user3 = new User();
-        user3.setUsername("user3");
-        user3.setPassword("user3");
-        user3.setEmail("user3@gmail.com");
+        usernameStorage.add("user2");
+        passwordStorage.put("user2","user2");
+        emailStorage.put("user2","user2@gmail.com");
 
-        User user4 = new User();
-        user4.setUsername("user4");
-        user4.setPassword("user4");
-        user4.setEmail("user4@gmail.com");
+        usernameStorage.add("user3");
+        passwordStorage.put("user3","user3");
+        emailStorage.put("user3","user3@gmail.com");
 
 
-        users.add(user1);
-        users.add(user2);
-        users.add(user3);
-        users.add(user4);
+        usernameStorage.add("user4");
+        passwordStorage.put("user4","user4");
+        emailStorage.put("user4","user4@gmail.com");
+
     }
 
     public static synchronized UserStorage getInstance() {
@@ -46,30 +46,44 @@ public class UserStorage {
     }
 
     public boolean login(String username, String password) {
-        for (User user : users) {
-            if (user.getUsername().equals(username) && user.getPassword().equals(password)) {
-                return true;
-            }
+
+        if(!usernameStorage.contains(username)) {
+            return false;
         }
-        return false;
+        return passwordStorage.get(username).equals(password);
     }
 
     public boolean userExists(User user) {
-        String checkUsername = user.getUsername();
-        String checkEmail  = user.getEmail();
-        for (User u : users) {
-            if (u.getUsername().equals(checkUsername) || u.getEmail().equals(checkEmail)) {
-                return true;
-            }
-        }
-        return false;
+        return usernameStorage.contains(user.getUsername());
     }
 
+    public boolean userAndEmailExists(User user) {
+
+        String checkUsername = user.getUsername();
+        String checkEmail  = user.getEmail();
+
+        if(!usernameStorage.contains(checkUsername)) return false;
+
+        return emailStorage.get(checkUsername).equals(checkEmail);
+    }
+
+
+
     public void addUser(User user) {
-        if(userExists(user)) {
-            throw new IllegalArgumentException("User already exists");
+        if(userAndEmailExists(user)) {
+            throw new IllegalArgumentException("User or email already exists");
         }
-        users.add(user);
+        usernameStorage.add(user.getUsername());
+        passwordStorage.put(user.getUsername(), user.getPassword());
+        emailStorage.put(user.getUsername(), user.getEmail());
+    }
+
+    public void setUUID(String username, String UUID) {
+        UUIDAuthentication.put(username,UUID);
+    }
+
+    public boolean authenticateUUID(String username, String checkUUID) {
+        return UUIDAuthentication.get(username).equals(checkUUID);
     }
 
 }

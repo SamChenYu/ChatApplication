@@ -31,7 +31,7 @@ function connectToMessageSocket(currentChatID) {
     }
 
     console.log("Connecting to chat with ID: " + currentChatID);
-    let socket = new SockJS(url + "/message");
+    let socket = new SockJS(`${url}/message?username=${encodeURIComponent(username)}&authToken=${encodeURIComponent(authToken)}`);
     stompMessageClient = Stomp.over(socket);
 
     stompMessageClient.connect({}, function(frame) {
@@ -54,7 +54,12 @@ function connectToMessageSocket(currentChatID) {
 
 
 function connectToChatSocket() {
-    let socket = new SockJS(url + "/message");
+    let socket = new SockJS(url + '/message', null, {
+        headers: {
+            'username': username,
+            'authToken': authToken
+        }
+    });
     stompChatClient = Stomp.over(socket);
 
     stompChatClient.connect({}, function(frame) {

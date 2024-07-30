@@ -78,11 +78,11 @@ public class UserStorage {
         emailStorage.put(user.getUsername(), user.getEmail());
     }
 
-    public void setUUID(String username, String UUID) {
+    public void setAuthToken(String username, String UUID) {
         UUIDAuthentication.put(username,UUID);
     }
 
-    public boolean authenticateUUID(String username, String checkUUID) {
+    public boolean checkAuthToken(String username, String checkUUID) {
         return UUIDAuthentication.get(username).equals(checkUUID);
     }
 

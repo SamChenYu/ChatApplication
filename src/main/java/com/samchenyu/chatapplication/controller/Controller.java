@@ -44,13 +44,20 @@ public class Controller {
         sample json to send in postman
         {
             "username": "user1",
-            "password": "user1"
+            "password": "user1",
+            "authToken": "<TOKEN>"
         }
      */
 
 
     @PostMapping("/sendmessage")
     public ResponseEntity<Chat> sendMessage(@RequestBody Message message) {
+
+        // Check the authToken
+        if (!messagingService.getUserStorage().checkAuthToken(message.getFrom(), message.getAuthToken())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         // User Sending Message Endpoint
         Chat chat = messagingService.sendMessage(message.getChatID(), message);
         if (chat == null) {
@@ -67,12 +74,22 @@ public class Controller {
             "recipient": "user2",
             "text": "this is a new message",
             "time": "12:00",
-            "chatID": "chat1"
+            "chatID": "chat1",
+            "authToken": "<TOKEN>"
         }
      */
 
     @PostMapping("/newchat")
     public ResponseEntity<Chat> newChat(@RequestBody ChatRequest chatRequest) {
+
+
+        // Check the authToken
+        System.out.println(chatRequest.getUser().getUsername());
+        System.out.println(chatRequest.getUser().getAuthToken());
+        if (!messagingService.getUserStorage().checkAuthToken(chatRequest.getUser().getUsername(), chatRequest.getUser().getAuthToken())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         // Search For Users Endpoint
         // If a chat object already exists, it will be returned, otherwise
         // a new chat object will be created and pushed to the sockets of the two users
@@ -101,7 +118,8 @@ public class Controller {
         {
             "user": {
                 "username": "user1",
-                "password": "user1"
+                "password": "user1",
+                "authToken": "<TOKEN>"
             },
             "recipient": "user2"
         }
@@ -110,6 +128,12 @@ public class Controller {
 
     @PostMapping("/loadchat")
     public ResponseEntity<Chat> loadChat(@RequestBody ChatRequest chatRequest) {
+
+        // Check the authToken
+        if (!messagingService.getUserStorage().checkAuthToken(chatRequest.getUser().getUsername(), chatRequest.getUser().getAuthToken())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         // If a socket sends chatlist updates, the frontend will call this endpoint
         // Because it already knows the chat object exists (there is no error handling)
         // This endpoint is also used to prevent infinite loops of loading the same chat (/newchat sends socket updates)
@@ -127,7 +151,8 @@ public class Controller {
         {
             "user": {
                 "username": "user1",
-                "password": "user1"
+                "password": "user1",
+                "authToken": "<TOKEN>"
             },
             "recipient": "user2"
         }
@@ -137,6 +162,12 @@ public class Controller {
     @PostMapping("/chatlist")
     public ResponseEntity<List<User>> chatList(@RequestBody User user) {
         // Endpoint to get the list of users the current user is chatting with
+
+        // Check the authToken
+        if (!messagingService.getUserStorage().checkAuthToken(user.getUsername(), user.getAuthToken())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
         List<User> userList = messagingService.getUserList(user);
         return ResponseEntity.ok(userList);
     }
@@ -144,7 +175,8 @@ public class Controller {
         sample json to send in postman
         {
             "username": "user1",
-            "password": "user1"
+            "password": "user1",
+            "authToken": "<TOKEN>"
         }
      */
 

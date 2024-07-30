@@ -1,7 +1,10 @@
 const username = sessionStorage.getItem("username");
 const password = sessionStorage.getItem("password");
+const authToken = sessionStorage.getItem("authToken");
+console.log(authToken);
 
-if(username == null || password == null) {
+
+if(username == null || password == null || authToken == null) {
     window.location.href = "index.html";
 }
 
@@ -57,11 +60,18 @@ async function loadChats() {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({username, password})
+            body: JSON.stringify({
+                username,
+                password,
+                authToken
+            })
         });
 
         const result = await response.json();
-        if (response.ok) {
+        if (response.status === 401) {
+            alert("Session expired. Please log in again.");
+            window.location.href = "index.html";
+        } else if (response.ok) {
             displayChats(result, false);
         } else {
             alert(result.message);
@@ -187,8 +197,9 @@ async function loadMessages(isSocketUpdate) {
             },
             body: JSON.stringify({
                 user: {
-                    username: username,
-                    password: password
+                    username,
+                    password,
+                    authToken
                 },
                 recipient: currentRecipient
             })
@@ -196,7 +207,11 @@ async function loadMessages(isSocketUpdate) {
 
         // Handle the response
         const result = await response.json();
-        if (response.ok) {
+
+        if (response.status === 401) {
+            alert("Session expired. Please log in again.");
+            window.location.href = "index.html";
+        } else if (response.ok) {
             clearChat();
             displayMessages(result);
             currentChatID = result.chatID;
@@ -326,11 +341,16 @@ async function sendMessage() {
                     recipient: currentRecipient,
                     text: message,
                     time: currentTime,
-                    chatID:  currentChatID
+                    chatID:  currentChatID,
+                    authToken: authToken
                 })
         });
         const result = await response.json();
-        if (response.ok) {
+
+        if(response.status === 401) {
+            alert("Session expired. Please log in again.");
+            window.location.href = "index.html";
+        } else if (response.ok) {
             clearChat();
             displayMessages(result, currentRecipient);
         } else {
@@ -363,8 +383,9 @@ async function searchUsers(searchValue) {
 
     const data = {
         user: {
-            username: username,
-            password: password
+            username,
+            password,
+            authToken
         },
         recipient: searchValue
     };
@@ -378,7 +399,10 @@ async function searchUsers(searchValue) {
         });
 
         const result = await response.json();
-        if (response.ok) {
+        if (response.status === 401) {
+            alert("Session expired. Please log in again.");
+            window.location.href = "index.html";
+        } else if (response.ok) {
             //currentRecipient = searchValue;
         } else {
             alert(result.message);

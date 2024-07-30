@@ -11,6 +11,7 @@ public class Message {
     private String time;
     private String chatID;
     private int messageID; // sequential numbering of chats
+    private String authToken; // authToken
 
 
 }

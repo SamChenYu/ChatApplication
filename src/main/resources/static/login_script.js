@@ -44,9 +44,8 @@ async function handleLogin() {
         });
         const result = await response.text();
         if (response.ok) {
-            // Response will contain an Auth Token UUID
-            console.log(result);
-
+            // Response will contain an Auth Token UUI
+            sessionStorage.setItem("authToken", result);
             sessionStorage.setItem("username", username);
             sessionStorage.setItem("password", password);
             window.location.replace("message.html");

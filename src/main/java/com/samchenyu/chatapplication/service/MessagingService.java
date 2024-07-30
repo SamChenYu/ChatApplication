@@ -68,7 +68,7 @@ public class MessagingService {
     public String newUUIDAuth(User user) {
         String username = user.getUsername();
         String newUUID = UUID.randomUUID().toString();
-         userStorage.getInstance().setUUID(username, newUUID);
+         userStorage.getInstance().setAuthToken(username, newUUID);
          return newUUID;
     }
 

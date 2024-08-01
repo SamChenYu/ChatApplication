@@ -1,6 +1,6 @@
 # ChatApplication
 
-## Fully Functioning Chat Application with Spring Web Sockets
+## Chat Application with Spring Web Sockets
 ### Features:
 - **Real-Time Chat:** 
   - Instant message delivery and updates using Spring WebSocket and STOMP protocol.

@@ -164,7 +164,7 @@ public class Controller {
         // Endpoint to get the list of users the current user is chatting with
 
         // Check the authToken
-        if (!messagingService.getUserStorage().checkAuthToken(user.getUsername(), user.getAuthToken())) {
+        if (!messagingService.getUserStorage().getInstance().checkAuthToken(user.getUsername(), user.getAuthToken())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 

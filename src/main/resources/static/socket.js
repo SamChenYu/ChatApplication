@@ -1,4 +1,4 @@
-let url = 'http://localhost:8080'; // server address
+let url = 'http://localhost:8080/message'; // server address
 let stompMessageClient;
 let stompChatClient;
 
@@ -31,7 +31,7 @@ function connectToMessageSocket(currentChatID) {
     }
 
     console.log("Connecting to chat with ID: " + currentChatID);
-    let socket = new SockJS(`${url}/message?username=${encodeURIComponent(username)}&authToken=${encodeURIComponent(authToken)}`);
+    let socket = new SockJS(`${url}?username=${encodeURIComponent(username)}&authToken=${encodeURIComponent(authToken)}`);
     stompMessageClient = Stomp.over(socket);
 
     stompMessageClient.connect({}, function(frame) {
@@ -54,14 +54,8 @@ function connectToMessageSocket(currentChatID) {
 
 
 function connectToChatSocket() {
-    let socket = new SockJS(url + '/message', null, {
-        headers: {
-            'username': username,
-            'authToken': authToken
-        }
-    });
+    let socket = new SockJS(`${url}?username=${encodeURIComponent(username)}&authToken=${encodeURIComponent(authToken)}`);
     stompChatClient = Stomp.over(socket);
-
     stompChatClient.connect({}, function(frame) {
 
         console.log("Connected: " + frame);

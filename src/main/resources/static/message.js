@@ -1,7 +1,6 @@
 const username = sessionStorage.getItem("username");
 const password = sessionStorage.getItem("password");
 const authToken = sessionStorage.getItem("authToken");
-console.log(authToken);
 
 
 if(username == null || password == null || authToken == null) {
@@ -67,17 +66,20 @@ async function loadChats() {
             })
         });
 
-        const result = await response.json();
-        if (response.status === 401) {
+        if(response.status === 401) { // UNAUTHORIZED
             alert("Session expired. Please log in again.");
             window.location.href = "index.html";
-        } else if (response.ok) {
+        }
+        const result = await response.json();
+        if (response.ok) {
             displayChats(result, false);
         } else {
             alert(result.message);
         }
     } catch (error) {
+        console.log(error);
         alert("Something went wrong in loadChats(). Please try again.");
+
     }
 }
 
@@ -205,13 +207,15 @@ async function loadMessages(isSocketUpdate) {
             })
         });
 
-        // Handle the response
-        const result = await response.json();
-
-        if (response.status === 401) {
+        if(response.status === 401) { // UNAUTHORIZED
             alert("Session expired. Please log in again.");
             window.location.href = "index.html";
-        } else if (response.ok) {
+            return;
+        }
+
+        // Handle the response
+        const result = await response.json();
+         if (response.ok) {
             clearChat();
             displayMessages(result);
             currentChatID = result.chatID;
@@ -221,7 +225,8 @@ async function loadMessages(isSocketUpdate) {
             console.error("Request failed:", result.message);
         }
     } catch (error) {
-        console.error("Error occurred during fetch:", error);
+        console.log(error);
+        alert("Something went wrong in loadMessages(). Please try again.");
     }
 }
 
@@ -329,7 +334,8 @@ async function sendMessage() {
     const now = new Date();
     const hours = now.getHours().toString().padStart(2, '0');
     const minutes = now.getMinutes().toString().padStart(2, '0');
-    const currentTime = `${hours}:${minutes}`;try {
+    const currentTime = `${hours}:${minutes}`;
+    try {
         const response = await fetch("http://localhost:8080/sendmessage", {
             method: "POST",
             headers: {
@@ -345,18 +351,22 @@ async function sendMessage() {
                     authToken: authToken
                 })
         });
-        const result = await response.json();
 
-        if(response.status === 401) {
+        if(response.status === 401) { // UNAUTHORIZED
             alert("Session expired. Please log in again.");
             window.location.href = "index.html";
-        } else if (response.ok) {
+            return;
+        }
+
+        const result = await response.json();
+        if (response.ok) {
             clearChat();
             displayMessages(result, currentRecipient);
         } else {
             alert(result.message);
         }
     } catch (error) {
+        console.log(error);
         alert("Something went wrong in sendMessage(). Please try again.");
     }
 }
@@ -398,18 +408,24 @@ async function searchUsers(searchValue) {
             body: JSON.stringify(data)
         });
 
-        const result = await response.json();
-        if (response.status === 401) {
+        if(response.status === 401) { // UNAUTHORIZED
             alert("Session expired. Please log in again.");
             window.location.href = "index.html";
-        } else if (response.ok) {
+            return;
+        } else if(response.status === 400) { // BAD REQUEST
+            alert("User not found. Try again.");
+            currentRecipient = previousRecipient; // Revert the recipient back to the previous recipient
+            return;
+        }
+        const result = await response.json();
+        if (response.ok) {
             //currentRecipient = searchValue;
         } else {
             alert(result.message);
         }
     } catch (error) {
-        alert("User not found. Try again.");
-        currentRecipient = previousRecipient; // Revert the recipient back to the previous recipient
+        console.log(error);
+        alert('Something went wrong in searchUsers(). Please try again.');
     }
 }
 

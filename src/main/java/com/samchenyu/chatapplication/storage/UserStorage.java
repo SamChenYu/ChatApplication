@@ -83,6 +83,8 @@ public class UserStorage {
     }
 
     public boolean checkAuthToken(String username, String checkUUID) {
+        if(username == null || checkUUID == null) return false;
+        if(!UUIDAuthentication.containsKey(username)) return false;
         return UUIDAuthentication.get(username).equals(checkUUID);
     }
 

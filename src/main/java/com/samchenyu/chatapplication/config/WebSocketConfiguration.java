@@ -1,6 +1,7 @@
 package com.samchenyu.chatapplication.config;
 
 import com.samchenyu.chatapplication.service.MessagingService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 
 import org.springframework.context.annotation.Configuration;
@@ -13,8 +14,12 @@ import org.springframework.web.socket.server.HandshakeInterceptor;
 
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
+import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.http.HttpStatus;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @Configuration
@@ -27,28 +32,32 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/message")
-                .setAllowedOrigins("http://localhost:3000")
+                .setAllowedOrigins("http://localhost:3000", "http://localhost:8080")
                 .withSockJS()
                 .setInterceptors(new HandshakeInterceptor() {
 
                     @Override
                     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler, Map<String, Object> attributes) throws Exception {
-                        String username = request.getURI().getQuery().split("&")[0].split("=")[1];  // Assuming 'username' is the first query parameter
-                        String authToken = request.getURI().getQuery().split("&")[1].split("=")[1];  // Assuming 'authToken' is the second query parameter
+                        if (request instanceof ServletServerHttpRequest) {
+                            HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
+                            String query = servletRequest.getQueryString();
+                            Map<String, String> params = splitQuery(query);
 
-                        if (username == null || authToken == null) {
-                            response.setStatusCode(HttpStatus.UNAUTHORIZED);
-                            return false;
+                            String username = params.get("username");
+                            String authToken = params.get("authToken");
+                            System.out.println(messagingService.getUserStorage().getInstance().checkAuthToken(username, authToken));
+
+                            // Validate the username and token
+                            if (messagingService.getUserStorage().getInstance().checkAuthToken(username, authToken)) {
+                                System.out.println("Handshake successful");
+                                return true;
+                            }
                         }
-
-                        // Validate the username and token
-                        if (messagingService.getUserStorage().getInstance().checkAuthToken(username, authToken)) {
-                            return true;
-                        }
-
                         response.setStatusCode(HttpStatus.UNAUTHORIZED);
+                        System.out.println("Handshake failed");
                         return false;
                     }
+
 
 
                     @Override
@@ -56,6 +65,16 @@ public class WebSocketConfiguration implements WebSocketMessageBrokerConfigurer 
                         // Do nothing
                     }
                 });
+    }
+
+    private Map<String, String> splitQuery(String query) throws UnsupportedEncodingException {
+        Map<String, String> query_pairs = new LinkedHashMap<>();
+        String[] pairs = query.split("&");
+        for (String pair : pairs) {
+            int idx = pair.indexOf("=");
+            query_pairs.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+        }
+        return query_pairs;
     }
 
     @Override

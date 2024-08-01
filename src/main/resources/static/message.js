@@ -69,6 +69,7 @@ async function loadChats() {
         if(response.status === 401) { // UNAUTHORIZED
             alert("Session expired. Please log in again.");
             window.location.href = "index.html";
+            return;
         }
         const result = await response.json();
         if (response.ok) {
@@ -156,7 +157,7 @@ function displayChats(users, isSocketUpdate) {
      // Add dummy chat cards to fill up the blank space
     for (let i = usersDisplayed; i < 7; i++) {
         const userDiv = document.createElement('div');
-        userDiv.classList.add('discussion', 'dummy');
+        userDiv.classList.add('discussion', 'dummy', 'empty');
 
         const descContactDiv = document.createElement('div');
         descContactDiv.classList.add('desc-contact');
@@ -387,6 +388,11 @@ async function searchUsers(searchValue) {
         If the username does not exist, then it will return HTTP bad request before the socket,
         then we know to immediately change the currentRecipient back to the previous recipient
      */
+
+    if(searchValue === username) {
+        alert('You cannot chat with yourself.');
+        return;
+    }
 
     const previousRecipient = currentRecipient;
     currentRecipient = searchValue;

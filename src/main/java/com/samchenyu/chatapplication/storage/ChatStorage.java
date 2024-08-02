@@ -108,8 +108,8 @@ public class ChatStorage {
         String username = user.getUsername();
 
         for (Chat chat : chats) {
-            for (User participant : chat.getParticipants()) {
-                if (participant.getUsername().equals(username)) {
+            for (String participant : chat.getParticipants()) {
+                if (participant.equals(username)) {
                     userChats.add(chat);
                 }
             }
@@ -123,12 +123,12 @@ public class ChatStorage {
         for (Chat chat : chats) {
             boolean user1Found = false;
             boolean user2Found = false;
-            for(User participant : chat.getParticipants()) {
-                if (participant.getUsername().equals(user1.getUsername())) {
+            for(String participant : chat.getParticipants()) {
+                if (participant.equals(user1.getUsername())) {
                     user1Found = true;
                     continue;
                 }
-                if (participant.getUsername().equals(user2.getUsername())) {
+                if (participant.equals(user2.getUsername())) {
                     user2Found = true;
                     continue;
                 }
@@ -146,8 +146,8 @@ public class ChatStorage {
     public Chat newChat(User user1, User user2) {
         Chat chat = new Chat();
         chat.setChatID(UUID.randomUUID().toString());
-        chat.getParticipants().add(user1);
-        chat.getParticipants().add(user2);
+        chat.getParticipants().add(user1.getUsername());
+        chat.getParticipants().add(user2.getUsername());
         return chat;
     }
 

@@ -7,6 +7,8 @@ if(username == null || password == null || authToken == null) {
     window.location.href = "index.html";
 }
 
+console.log(authToken);
+
 let currentChatID = null;
 let currentRecipient = null;
 

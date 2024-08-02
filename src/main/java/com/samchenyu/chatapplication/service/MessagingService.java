@@ -41,10 +41,12 @@ public class MessagingService {
         List<User> users = new ArrayList<>();
         // for each chat, get the other user
         for (Chat chat : chats) {
-            List<User> participants = chat.getParticipants();
-            for (User participant : participants) {
-                if (!participant.getUsername().equals(user.getUsername())) {
-                    users.add(participant);
+            List<String> participants = chat.getParticipants();
+            for (String participant : participants) {
+                if (!participant.equals(user.getUsername())) {
+                    User user1 = new User();
+                    user1.setUsername(participant);
+                    users.add(user1);
                 }
             }
         }

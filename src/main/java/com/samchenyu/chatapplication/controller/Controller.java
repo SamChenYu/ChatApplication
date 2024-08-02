@@ -59,6 +59,7 @@ public class Controller {
         }
 
         // User Sending Message Endpoint
+        message.setAuthToken(null); // remove the authToken from the message object
         Chat chat = messagingService.sendMessage(message.getChatID(), message);
         if (chat == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();

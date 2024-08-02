@@ -19,7 +19,7 @@ let stompChatClient;
 
 connectToChatSocket();
 
-function connectToMessageSocket(currentChatID) {
+async function  connectToMessageSocket(currentChatID) {
 
     // If there is a previous connection to a chat, disconnect it
     // This is to prevent being redirected to another chat if there is an incoming message
@@ -40,15 +40,59 @@ function connectToMessageSocket(currentChatID) {
         // Subscribe to the chat topic
         // This will update the chat window with new incoming / outcoming messages
         stompMessageClient.subscribe("/topic/" + currentChatID, function (response) {
-            let data = JSON.parse(response.body);
-            clearChat();
-            displayMessages(data, currentRecipient);
+            let data = response.body;
+            console.log(data);
+            requestRecentMessages();
+
+
         });
 
     }, function(error) {
         console.error("STOMP error in message: ", error);
     });
 }
+
+
+
+async function requestRecentMessages() {
+    try {
+        const response = await fetch("http://localhost:8080/chatUpdateRequest", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(
+                {
+                    username: username,
+                    authToken: authToken,
+                    chatID:  currentChatID,
+                    messageID: lastLoadedMessage
+                })
+        });
+
+        if(response.status === 401) { // UNAUTHORIZED
+            alert("Session expired. Please log in again.");
+            window.location.href = "index.html";
+            return;
+        }
+        const result = await response.json();
+        if (response.ok) {
+            console.log(result);
+            displayMessages(result, currentRecipient);
+        } else {
+            alert(result.message);
+        }
+    } catch (error) {
+        console.log(error);
+        alert("Something went wrong in requestRecentMessages(). Please try again.");
+    }
+}
+
+
+
+
+
+
 
 
 
@@ -73,5 +117,6 @@ function connectToChatSocket() {
         console.error("STOMP error in chatlist: ", error);
     });
 }
+
 
 

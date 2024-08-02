@@ -74,6 +74,19 @@ public class MessagingService {
          return newUUID;
     }
 
+    public List<Message> getMessagesSince(String chatID, int messageID) {
+
+        Chat chat = chatStorage.getInstance().getChatByID(chatID);
+        List<Message> chatMessages = chat.getMessages();
+
+        List<Message> messages = new ArrayList<>();
+        for(int i=messageID+1; i<chatMessages.size(); i++) {
+            messages.add(chatMessages.get(i));
+        }
+        return messages;
+    }
+
+
     public UserStorage getUserStorage() {
         return userStorage.getInstance();
     }

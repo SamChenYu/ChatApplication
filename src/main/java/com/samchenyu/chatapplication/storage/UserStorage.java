@@ -88,4 +88,8 @@ public class UserStorage {
         return UUIDAuthentication.get(username).equals(checkUUID);
     }
 
+
+    public void logout(String username) {
+        UUIDAuthentication.remove(username);
+    }
 }

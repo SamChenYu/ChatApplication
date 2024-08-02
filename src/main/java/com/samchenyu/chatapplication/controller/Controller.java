@@ -1,6 +1,7 @@
 package com.samchenyu.chatapplication.controller;
 
 
+import com.samchenyu.chatapplication.controller.dto.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -51,7 +52,7 @@ public class Controller {
 
 
     @PostMapping("/sendmessage")
-    public ResponseEntity<Chat> sendMessage(@RequestBody Message message) {
+    public ResponseEntity<Void> sendMessage(@RequestBody Message message) {
 
         // Check the authToken
         if (!messagingService.getUserStorage().checkAuthToken(message.getFrom(), message.getAuthToken())) {
@@ -64,8 +65,8 @@ public class Controller {
         if (chat == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-        simpMessagingTemplate.convertAndSend("/topic/" + message.getChatID(), chat); // sends the message to the socket
-        return ResponseEntity.ok(chat);
+        simpMessagingTemplate.convertAndSend("/topic/" + message.getChatID(), "Incoming Message"); // Sends a notification to the socket
+        return ResponseEntity.ok().build();
     }
 
     /* address: localhost:8080/sendmessage
@@ -197,4 +198,63 @@ public class Controller {
         }
      */
 
+
+    @PostMapping("/chatUpdateRequest")
+    public ResponseEntity<Chat> chatUpdateRequest(@RequestBody MessageUpdateRequest messageUpdateRequest) {
+
+        // Check the authToken
+        if (!messagingService.getUserStorage().getInstance().checkAuthToken(messageUpdateRequest.getUsername(), messageUpdateRequest.getAuthToken())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        // If the chat has already been loaded, the frontend will call this endpoint to get new messages
+        // To prevent the entire chat object being sent again
+        List<Message> messages = messagingService.getMessagesSince(messageUpdateRequest.getChatID(), messageUpdateRequest.getMessageID());
+        Chat chat = new Chat(); // Wrap the messages into a Chat object for the frontend (displayMessages requires a Chat object)
+        chat.setMessages(messages);
+        return ResponseEntity.ok(chat);
+    }
+
+    /*
+        address: localhost:8080/chatUpdateRequest
+        sample json to send in postman
+        {
+            "username": "user1",
+            "authToken": "<TOKEN>",
+            "chatID": "chat1",
+            "messageID": 0
+        }
+     */
+
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestBody User user) {
+
+        // Check the authToken
+        if (!messagingService.getUserStorage().getInstance().checkAuthToken(user.getUsername(), user.getAuthToken())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        // User Logout Endpoint
+        messagingService.getUserStorage().getInstance().logout(user.getUsername());
+        return ResponseEntity.ok().build();
+    }
+
+    /* address: localhost:8080/logout
+        sample json to send in postman
+        {
+            "username": "user1",
+            "password": "user1",
+            "authToken": "<TOKEN>"
+        }
+     */
+
+
+
+
+
+
 }
+
+
+

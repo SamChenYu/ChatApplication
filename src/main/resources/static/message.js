@@ -2,15 +2,16 @@ const username = sessionStorage.getItem("username");
 const password = sessionStorage.getItem("password");
 const authToken = sessionStorage.getItem("authToken");
 
+console.log(authToken);
 
 if(username == null || password == null || authToken == null) {
     window.location.href = "index.html";
 }
 
-console.log(authToken);
 
 let currentChatID = null;
 let currentRecipient = null;
+let lastLoadedMessage = -1; // Keeps track of the last message loaded to not req the whole chat
 
 main();
 
@@ -133,6 +134,7 @@ function displayChats(users, isSocketUpdate) {
                 chat.classList.remove('message-active'); // Make sure that there are no other active chats
             });
             userDiv.classList.add('message-active');
+            lastLoadedMessage = -1; // Reset the last loaded message
         });
          // Create the necessary elements
          const descContactDiv = document.createElement('div');
@@ -236,7 +238,7 @@ async function loadMessages(isSocketUpdate) {
 function displayMessages(response) {
 
     // Displays the messages on the browser
-    // PARAMS: An array of messages
+    // PARAMS: A chat object {chatID, recipient, messages}
 
     /*
         FORM for the message from the other user
@@ -288,6 +290,8 @@ function displayMessages(response) {
 
         messagesContainer.scrollTop = messagesContainer.scrollHeight; // scroll to the bottom of the chat for the most recent messages
 
+        lastLoadedMessage = message.messageID; // Update the last loaded messageID
+        console.log('Last loaded message:', lastLoadedMessage);
     });
 }
 
@@ -360,14 +364,14 @@ async function sendMessage() {
             window.location.href = "index.html";
             return;
         }
-
-        const result = await response.json();
-        if (response.ok) {
-            clearChat();
-            displayMessages(result, currentRecipient);
-        } else {
-            alert(result.message);
-        }
+        // Previously the controller would send the chat object back, but now we are using sockets
+        // const result = await response.json();
+        // if (response.ok) {
+        //     clearChat();
+        //     displayMessages(result, currentRecipient);
+        // } else {
+        //     alert(result.message);
+        // }
     } catch (error) {
         console.log(error);
         alert("Something went wrong in sendMessage(). Please try again.");
@@ -442,4 +446,8 @@ function clearChat() {
     const messagesChat = document.querySelector('.messages-chat');
     messagesChat.innerHTML = '';
 }
+
+
+
+
 

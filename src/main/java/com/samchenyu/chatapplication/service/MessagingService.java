@@ -2,6 +2,7 @@ package com.samchenyu.chatapplication.service;
 
 
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.samchenyu.chatapplication.model.*;
@@ -19,6 +20,9 @@ public class MessagingService {
 
     private final UserStorage userStorage = UserStorage.getInstance();
     private final ChatStorage chatStorage = ChatStorage.getInstance();
+
+    @Autowired
+    private Repository repository;
 
     public Chat connectToChat(User user1, User user2) {
         // check if the users exist in the first place

@@ -2,8 +2,10 @@ package com.samchenyu.chatapplication.controller;
 
 
 import com.samchenyu.chatapplication.controller.dto.*;
+import com.samchenyu.chatapplication.storage.Repository;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -22,6 +24,9 @@ import java.util.List;
 @AllArgsConstructor
 @RequestMapping
 public class Controller {
+
+    @Autowired
+    private final Repository repository;
 
     private final MessagingService messagingService;
     private final SimpMessagingTemplate simpMessagingTemplate;

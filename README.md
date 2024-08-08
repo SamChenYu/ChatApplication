@@ -6,7 +6,7 @@
   - Instant message delivery and updates using Spring WebSocket and STOMP protocol.
   - Users can send and receive messages in real time
 - **Message Persistence:**
-  - Messages are stored on the server, ensuring that all chat history is retained even if users disconnect or restart the application.
+  - Messages are stored on the database, ensuring that all chat history is retained even if users disconnect or restart the application.
   - Each chat conversation is uniquely identified and messages are associated with the correct chat session.
 - **Chat Sessions:**
   - Users can engage in multiple chat sessions simultaneously.
@@ -17,7 +17,6 @@
 - **Responsive Front-End:**
   - User interface is designed to be responsive and user-friendly, making it accessible on various devices.
   - Provides a clean and intuitive chat interface with support for message display and input.
-  - **User Management:**
   - **Login System:**
     - Users can log in with a unique username and password.
     - Authentication is handled securely, ensuring only authorized users can access their chat sessions.

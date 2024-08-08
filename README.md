@@ -27,6 +27,7 @@
 ### Technologies Used:
 - **Frontend:** JavaScript, SockJS, STOMP
 - **Backend:** Spring Boot, Spring WebSocket
+- **Database:** MySQL
 
 [Front End Login Design](https://codepen.io/Gogila-_/pen/VwJYqxB)  
 [Front End Chat Design](https://codepen.io/ThomasDaubenton/pen/QMqaBN)

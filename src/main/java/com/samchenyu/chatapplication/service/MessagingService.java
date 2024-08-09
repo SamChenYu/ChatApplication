@@ -22,6 +22,9 @@ public class MessagingService {
     @Autowired
     private ChatRepository chatRepository;
 
+    //@Autowired
+    //rivate PasswordEncoder passwordEncoder;
+
 
 
     // USER SERVICE
@@ -47,8 +50,11 @@ public class MessagingService {
         Optional<User> userOptional = userRepository.findByUsername(username);
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            return user.getPassword().equals(password);
+            String dbPassword = user.getPassword();
+            //return passwordEncoder.matches(password, dbPassword);
+            return password.equals(dbPassword);
         } else {
+            System.out.println("User not found");
             return false;
         }
     }
@@ -83,13 +89,21 @@ public class MessagingService {
         if(!userRepository.existsByUsername(user1.getUsername()) || !userRepository.existsByUsername(user2.getUsername())) {
             return null;
         }
-        return chatRepository.findByParticipants(user1.getUsername(), user2.getUsername())
-                .orElseThrow(() -> new RuntimeException("Chat with " + user1.getUsername() + " and " + user2.getUsername() + " not found"));
-    }
 
-
-    public List<Chat> getChatList(User user) {
-        return chatRepository.findChatsByParticipant(user.getUsername());
+        Optional<Chat> chat = chatRepository.findByParticipants(user1.getUsername(), user2.getUsername());
+        if(chat.isPresent()) {
+            System.out.println("Chat already exists with ID " + chat.get().getChatID());
+            return chat.get();
+        } else {
+            // Create a new chat between the two users
+            Chat newChat = new Chat();
+            newChat.setChatID();
+            System.out.println("New chat created with ID " + newChat.getChatID());
+            newChat.addParticipant(user1);
+            newChat.addParticipant(user2);
+            chatRepository.save(newChat);
+            return newChat;
+        }
     }
 
     public List<User> getUserList(User user) {
@@ -114,25 +128,40 @@ public class MessagingService {
         if(message == null) {
             return null;
         }
-        Chat chat = chatRepository.findById(chatID)
-                .orElseThrow(() -> new RuntimeException("Chat with ID " + chatID + " not found"));
-        chat.addMessage(message);
-        return chat;
+        Optional<Chat> optional = chatRepository.findById(chatID);
+
+        if(optional.isPresent()) {
+            Chat chat = optional.get();
+            int currentMessageID = chat.getCurrentMessageID();
+            chat.setCurrentMessageID(currentMessageID + 1);
+            chat.addMessage(message);
+            chatRepository.save(chat);
+            int size = chat.getMessages().size(); // force the lazy load
+            return chat;
+
+        } else {
+            return null;
+        }
     }
 
 
 
     public List<Message> getMessagesSince(String chatID, int messageID) {
 
-        Chat chat = chatRepository.findById(chatID)
-                .orElseThrow(() -> new RuntimeException("Chat with ID " + chatID + " not found"));
-        List<Message> chatMessages = chat.getMessages();
 
-        List<Message> messages = new ArrayList<>();
-        for(int i=messageID+1; i<chatMessages.size(); i++) {
-            messages.add(chatMessages.get(i));
+        Optional<Chat> optional = chatRepository.findById(chatID);
+
+        if(optional.isPresent()) {
+            Chat chat = optional.get();
+            List<Message> messages = chat.getMessages();
+            List<Message> messagesSince = new ArrayList<>();
+            for(int i=messageID+1; i<messages.size(); i++) {
+                messagesSince.add(messages.get(i));
+            }
+            return messagesSince;
+        } else {
+            return null;
         }
-        return messages;
     }
 
 

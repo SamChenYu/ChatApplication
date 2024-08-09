@@ -16,10 +16,9 @@ let stompChatClient;
         There will be only one connection when the user logs in
  */
 
-
 connectToChatSocket();
 
-async function  connectToMessageSocket(currentChatID) {
+async function connectToMessageSocket(currentChatID) {
 
     // If there is a previous connection to a chat, disconnect it
     // This is to prevent being redirected to another chat if there is an incoming message
@@ -83,6 +82,7 @@ async function requestRecentMessages() {
             alert(result.message);
         }
     } catch (error) {
+
         console.log(error);
         alert("Something went wrong in requestRecentMessages(). Please try again.");
     }

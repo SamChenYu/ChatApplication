@@ -1,5 +1,6 @@
 package com.samchenyu.chatapplication.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -8,10 +9,8 @@ import lombok.Data;
 @Data
 public class Message {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "messageID")
-    private int messageID; // sequential numbering of chats
+    @EmbeddedId
+    private MessageID messageID;
 
     @Column(name = "`from`") // quotations because from is a reserved keyword
     private String from;
@@ -22,16 +21,14 @@ public class Message {
     @Column(name = "recipient")
     private String recipient;
 
-    @Column(name = "`time`") // quotations because time is a reserved keyword
+    @Column(name = "`time`")
     private String time;
-
-    @Column(name = "chatID")
-    private String chatID;
 
     @Column(name="authToken")
     private String authToken; // authToken
 
     @ManyToOne
     @JoinColumn(name = "chatID", insertable = false, updatable = false)
+    @JsonBackReference // Avoid circular references
     private Chat chat;
 }

@@ -192,7 +192,6 @@ async function loadMessages(isSocketUpdate) {
     // Calls displayMessages to display the messages on the UI
 
     if(currentRecipient === null) return;
-
     // /newchat -> not sure if the chat exists (user searching)
     // /loadchat -> received from socket therefore chat exists
     const url = isSocketUpdate ? "http://localhost:8080/newchat" : "http://localhost:8080/loadchat";
@@ -220,10 +219,13 @@ async function loadMessages(isSocketUpdate) {
 
         // Handle the response
         const result = await response.json();
+        console.log(result);
          if (response.ok) {
             clearChat();
             displayMessages(result);
+            console.log('last loaded message:', lastLoadedMessage);
             currentChatID = result.chatID;
+            console.log('Connecting to chatSocket :', currentChatID);
             connectToMessageSocket(currentChatID);
             return result;
         } else {
@@ -236,7 +238,7 @@ async function loadMessages(isSocketUpdate) {
 }
 
 function displayMessages(response) {
-
+    console.log(response);
     // Displays the messages on the browser
     // PARAMS: A chat object {chatID, recipient, messages}
 
@@ -290,7 +292,7 @@ function displayMessages(response) {
 
         messagesContainer.scrollTop = messagesContainer.scrollHeight; // scroll to the bottom of the chat for the most recent messages
 
-        lastLoadedMessage = message.messageID; // Update the last loaded messageID
+        lastLoadedMessage = message.messageID.messageID; // Update the last loaded messageID
         console.log('Last loaded message:', lastLoadedMessage);
     });
 }
@@ -349,12 +351,16 @@ async function sendMessage() {
                 "Content-Type": "application/json"
             },
             body: JSON.stringify(
+
                 {
+                        messageID: {
+                            chatID:  currentChatID,
+                            messageID: lastLoadedMessage + 1
+                        },
                     from: username,
                     recipient: currentRecipient,
                     text: message,
                     time: currentTime,
-                    chatID:  currentChatID,
                     authToken: authToken
                 })
         });

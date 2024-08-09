@@ -10,12 +10,12 @@ import jakarta.persistence.Table;
 @Data
 public class User {
     @Id
+    @Column(name = "username")
+    private String username;
     @Column(name = "authToken")
     private String authToken;
     @Column(name = "email")
     private String email;
-    @Column(name = "username")
-    private String username;
     @Column(name = "password")
     private String password;
 }

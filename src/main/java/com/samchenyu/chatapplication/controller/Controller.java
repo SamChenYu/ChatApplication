@@ -54,7 +54,6 @@ public class Controller {
 
     @PostMapping("/sendmessage")
     public ResponseEntity<Void> sendMessage(@RequestBody Message message) {
-
         // Check the authToken
         if (!messagingService.checkAuthToken(message.getFrom(), message.getAuthToken())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -62,24 +61,27 @@ public class Controller {
 
         // User Sending Message Endpoint
         message.setAuthToken(null); // remove the authToken from the message object
-        Chat chat = messagingService.sendMessage(message.getChatID(), message);
+        Chat chat = messagingService.sendMessage(message.getMessageID().getChatID(), message);
         if (chat == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-        simpMessagingTemplate.convertAndSend("/topic/" + message.getChatID(), "Incoming Message"); // Sends a notification to the socket
+        simpMessagingTemplate.convertAndSend("/topic/" + message.getMessageID().getChatID(), "Incoming Message"); // Sends a notification to the socket
         return ResponseEntity.ok().build();
     }
 
     /* address: localhost:8080/sendmessage
         sample json to send in postman
-        {
-            "from": "user1",
-            "recipient": "user2",
-            "text": "this is a new message",
-            "time": "12:00",
+    {
+        "messageID": {
             "chatID": "chat1",
-            "authToken": "<TOKEN>"
-        }
+            "messageID": 0
+    },
+    "from": "user1",
+    "recipient": "user2",
+    "text": "this is a new message",
+    "time": "12:00",
+    "authToken": "<authToken>"
+}
      */
 
     @PostMapping("/newchat")

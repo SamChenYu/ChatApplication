@@ -31,10 +31,22 @@
 [Front End Login Design](https://codepen.io/Gogila-_/pen/VwJYqxB)  
 [Front End Chat Design](https://codepen.io/ThomasDaubenton/pen/QMqaBN)
 
-
 <img width="1335" alt="image" src="https://github.com/user-attachments/assets/910aa7e0-cb30-4303-a42b-54a00e525a29">
 
 <img width="1191" alt="image" src="https://github.com/user-attachments/assets/e56a7467-2753-4cc8-a366-363629d5fee2">
+
+**Database Design:**
+
+- **Chat to Participants:** One-to-Many relationship  
+  - **Foreign Key:** `chatID` in the `Participants` table references `chatID` in the `Chat` table  
+
+- **Chat to Messages:** One-to-Many relationship  
+  - **Foreign Key:** `chatID` in the `Messages` table references `chatID` in the `Chat` table  
+
+- **Users:** No direct relationship with `Chat` or `Participants`  
+
+<img width="518" alt="image" src="https://github.com/user-attachments/assets/6f157e12-ff94-4509-8edc-32ea04a58fa5">
+
 
 
 

@@ -188,7 +188,11 @@ public class Controller {
     @PostMapping("/adduser")
     public ResponseEntity<Void> addUser(@RequestBody User user) {
         // Registration Endpoint
-        messagingService.addUser(user);
+        try {
+            messagingService.addUser(user);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
         System.out.println("user added");
         return ResponseEntity.ok().build();
     }

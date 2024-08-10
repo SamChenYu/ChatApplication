@@ -30,6 +30,9 @@ public class MessagingService {
     // USER SERVICE
 
     public void addUser(User user) {
+        if(userRepository.existsByUsername(user.getUsername())) {
+            throw new RuntimeException("User already exists");
+        }
         userRepository.save(user);
     }
 

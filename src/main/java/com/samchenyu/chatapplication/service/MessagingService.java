@@ -2,6 +2,7 @@ package com.samchenyu.chatapplication.service;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.samchenyu.chatapplication.model.*;
@@ -22,8 +23,8 @@ public class MessagingService {
     @Autowired
     private ChatRepository chatRepository;
 
-    //@Autowired
-    //rivate PasswordEncoder passwordEncoder;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
 
 
@@ -33,6 +34,7 @@ public class MessagingService {
         if(userRepository.existsByUsername(user.getUsername())) {
             throw new RuntimeException("User already exists");
         }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
 
@@ -54,8 +56,7 @@ public class MessagingService {
         if (userOptional.isPresent()) {
             User user = userOptional.get();
             String dbPassword = user.getPassword();
-            //return passwordEncoder.matches(password, dbPassword);
-            return password.equals(dbPassword);
+            return passwordEncoder.matches(password, dbPassword);
         } else {
             System.out.println("User not found");
             return false;

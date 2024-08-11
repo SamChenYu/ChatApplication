@@ -42,6 +42,17 @@ async function handleLogin() {
             },
             body: JSON.stringify({ username, password })
         });
+
+
+        if(response.status === 401) { // UNAUTHORIZED
+            showError(
+                document.getElementById("pass"),
+                "Login failed. Please try again."
+            );
+            return;
+        }
+
+
         const result = await response.text();
         if (response.ok) {
             // Response will contain an Auth Token UUI

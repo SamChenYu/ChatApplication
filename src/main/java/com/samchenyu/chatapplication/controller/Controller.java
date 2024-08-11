@@ -4,7 +4,6 @@ package com.samchenyu.chatapplication.controller;
 import com.samchenyu.chatapplication.controller.dto.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -24,6 +23,7 @@ import java.util.List;
 @RequestMapping
 public class Controller {
 
+
     private final MessagingService messagingService;
     private final SimpMessagingTemplate simpMessagingTemplate;
 
@@ -31,7 +31,7 @@ public class Controller {
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody User user) {
         // User Login Endpoint
-        boolean success = messagingService.login(user.getUsername(), user.getPassword());
+        boolean success = messagingService.login(user.getUsername(), user.getPassword()); // messagingServices handles the passwordEncoding
 
         if (success) {
             String authToken = messagingService.newUUIDAuth(user);

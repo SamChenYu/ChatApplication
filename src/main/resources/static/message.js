@@ -65,12 +65,11 @@ async function loadChats() {
             },
             body: JSON.stringify({
                 username,
-                password,
-                authToken
+                password
             })
         });
 
-        if(response.status === 401) { // UNAUTHORIZED
+        if(response.status === 403) { // UNAUTHORIZED
             alert("Session expired. Please log in again.");
             window.location.href = "index.html";
             return;
@@ -206,14 +205,13 @@ async function loadMessages(isSocketUpdate) {
             body: JSON.stringify({
                 user: {
                     username,
-                    password,
-                    authToken
+                    password
                 },
                 recipient: currentRecipient
             })
         });
 
-        if(response.status === 401) { // UNAUTHORIZED
+        if(response.status === 403) { // UNAUTHORIZED
             alert("Session expired. Please log in again.");
             window.location.href = "index.html";
             return;
@@ -363,12 +361,11 @@ async function sendMessage() {
                     from: username,
                     recipient: currentRecipient,
                     text: message,
-                    time: currentTime,
-                    authToken: authToken
+                    time: currentTime
                 })
         });
 
-        if(response.status === 401) { // UNAUTHORIZED
+        if(response.status === 403) { // UNAUTHORIZED
             alert("Session expired. Please log in again.");
             window.location.href = "index.html";
             return;
@@ -416,7 +413,6 @@ async function searchUsers(searchValue) {
         user: {
             username,
             password,
-            authToken
         },
         recipient: searchValue
     };
@@ -430,7 +426,7 @@ async function searchUsers(searchValue) {
             body: JSON.stringify(data)
         });
 
-        if(response.status === 401) { // UNAUTHORIZED
+        if(response.status === 403) { // UNAUTHORIZED
             alert("Session expired. Please log in again.");
             window.location.href = "index.html";
             return;
@@ -477,7 +473,6 @@ window.addEventListener('beforeunload', function (e) {
             body: JSON.stringify({
                 username,
                 password,
-                authToken
             })
         });
     } catch (error) {

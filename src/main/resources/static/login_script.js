@@ -44,7 +44,7 @@ async function handleLogin() {
         });
 
 
-        if(response.status === 401) { // UNAUTHORIZED
+        if(response.status === 403) { // UNAUTHORIZED
             showError(
                 document.getElementById("pass"),
                 "Login failed. Please try again."

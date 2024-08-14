@@ -64,7 +64,6 @@ async function requestRecentMessages() {
             body: JSON.stringify(
                 {
                     username: username,
-                    authToken: authToken,
                     chatID:  currentChatID,
                     messageID: lastLoadedMessage
                 })

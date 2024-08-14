@@ -40,7 +40,7 @@ public class Controller {
         if (success) {
 
             String authToken = jwtService.generateToken(user.getUsername()); // Generate a JWT token
-            messagingService.setAuthToken(user.getUsername(), authToken); // Set the token in the database
+            messagingService.setAuthToken(user.getUsername(), authToken); // Set the token in the database -> Used only for the socket
             System.out.println("login success");
             return ResponseEntity.ok(authToken);
         } else {
@@ -62,11 +62,6 @@ public class Controller {
 
     @PostMapping("/sendmessage")
     public ResponseEntity<Void> sendMessage(@RequestBody Message message) {
-
-        // Check the authToken
-        if(!jwtService.validateToken(message.getAuthToken(), messagingService.loadUserByUsername(message.getFrom()))) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
 
         // User Sending Message Endpoint
         message.setAuthToken(null); // remove the authToken from the message object
@@ -95,12 +90,6 @@ public class Controller {
 
     @PostMapping("/newchat")
     public ResponseEntity<Chat> newChat(@RequestBody ChatRequest chatRequest) {
-
-
-        // Check the authToken
-        if(!jwtService.validateToken(chatRequest.getUser().getAuthToken(), messagingService.loadUserByUsername(chatRequest.getUser().getUsername()))) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
 
         // Search For Users Endpoint
         // If a chat object already exists, it will be returned, otherwise
@@ -141,11 +130,6 @@ public class Controller {
     @PostMapping("/loadchat")
     public ResponseEntity<Chat> loadChat(@RequestBody ChatRequest chatRequest) {
 
-        // Check the authToken
-        if(!jwtService.validateToken(chatRequest.getUser().getAuthToken(), messagingService.loadUserByUsername(chatRequest.getUser().getUsername()))) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
         // If a socket sends chatlist updates, the frontend will call this endpoint
         // Because it already knows the chat object exists (there is no error handling)
         // This endpoint is also used to prevent infinite loops of loading the same chat (/newchat sends socket updates)
@@ -174,12 +158,6 @@ public class Controller {
     @PostMapping("/chatlist")
     public ResponseEntity<List<User>> chatList(@RequestBody User user) {
         // Endpoint to get the list of users the current user is chatting with
-
-        // Check the authToken
-        if(!jwtService.validateToken(user.getAuthToken(), messagingService.loadUserByUsername(user.getUsername()))) {
-            System.out.println("Chatlist unauthorized");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
 
         System.out.println("chatlist authorized");
 
@@ -218,12 +196,6 @@ public class Controller {
 
     @PostMapping("/chatUpdateRequest")
     public ResponseEntity<Chat> chatUpdateRequest(@RequestBody MessageUpdateRequest messageUpdateRequest) {
-
-        // Check the authToken
-        if(!jwtService.validateToken(messageUpdateRequest.getAuthToken(), messagingService.loadUserByUsername(messageUpdateRequest.getUsername()))) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
 
         // If the chat has already been loaded, the frontend will call this endpoint to get new messages
         // To prevent the entire chat object being sent again

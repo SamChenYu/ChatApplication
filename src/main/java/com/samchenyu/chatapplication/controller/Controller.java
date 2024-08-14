@@ -2,10 +2,12 @@ package com.samchenyu.chatapplication.controller;
 
 
 import com.samchenyu.chatapplication.controller.dto.*;
+import com.samchenyu.chatapplication.config.jwt.*;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +25,8 @@ import java.util.List;
 @RequestMapping
 public class Controller {
 
+    @Autowired
+    private JWTService jwtService;
 
     private final MessagingService messagingService;
     private final SimpMessagingTemplate simpMessagingTemplate;
@@ -34,7 +38,9 @@ public class Controller {
         boolean success = messagingService.login(user.getUsername(), user.getPassword()); // messagingServices handles the passwordEncoding
 
         if (success) {
-            String authToken = messagingService.newUUIDAuth(user);
+
+            String authToken = jwtService.generateToken(user.getUsername()); // Generate a JWT token
+            messagingService.setAuthToken(user.getUsername(), authToken); // Set the token in the database
             System.out.println("login success");
             return ResponseEntity.ok(authToken);
         } else {
@@ -52,10 +58,13 @@ public class Controller {
      */
 
 
+
+
     @PostMapping("/sendmessage")
     public ResponseEntity<Void> sendMessage(@RequestBody Message message) {
+
         // Check the authToken
-        if (!messagingService.checkAuthToken(message.getFrom(), message.getAuthToken())) {
+        if(!jwtService.validateToken(message.getAuthToken(), messagingService.loadUserByUsername(message.getFrom()))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -89,9 +98,7 @@ public class Controller {
 
 
         // Check the authToken
-        System.out.println(chatRequest.getUser().getUsername());
-        System.out.println(chatRequest.getUser().getAuthToken());
-        if (!messagingService.checkAuthToken(chatRequest.getUser().getUsername(), chatRequest.getUser().getAuthToken())) {
+        if(!jwtService.validateToken(chatRequest.getUser().getAuthToken(), messagingService.loadUserByUsername(chatRequest.getUser().getUsername()))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -135,7 +142,7 @@ public class Controller {
     public ResponseEntity<Chat> loadChat(@RequestBody ChatRequest chatRequest) {
 
         // Check the authToken
-        if (!messagingService.checkAuthToken(chatRequest.getUser().getUsername(), chatRequest.getUser().getAuthToken())) {
+        if(!jwtService.validateToken(chatRequest.getUser().getAuthToken(), messagingService.loadUserByUsername(chatRequest.getUser().getUsername()))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -169,9 +176,12 @@ public class Controller {
         // Endpoint to get the list of users the current user is chatting with
 
         // Check the authToken
-        if (!messagingService.checkAuthToken(user.getUsername(), user.getAuthToken())) {
+        if(!jwtService.validateToken(user.getAuthToken(), messagingService.loadUserByUsername(user.getUsername()))) {
+            System.out.println("Chatlist unauthorized");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
+        System.out.println("chatlist authorized");
 
         List<User> userList = messagingService.getUserList(user);
         return ResponseEntity.ok(userList);
@@ -210,9 +220,10 @@ public class Controller {
     public ResponseEntity<Chat> chatUpdateRequest(@RequestBody MessageUpdateRequest messageUpdateRequest) {
 
         // Check the authToken
-        if (!messagingService.checkAuthToken(messageUpdateRequest.getUsername(), messageUpdateRequest.getAuthToken())) {
+        if(!jwtService.validateToken(messageUpdateRequest.getAuthToken(), messagingService.loadUserByUsername(messageUpdateRequest.getUsername()))) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
 
         // If the chat has already been loaded, the frontend will call this endpoint to get new messages
         // To prevent the entire chat object being sent again
@@ -236,7 +247,7 @@ public class Controller {
 
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@RequestBody User user) {
-
+        System.out.println(user.getUsername() + "logged out");
         // Check the authToken
         if (!messagingService.checkAuthToken(user.getUsername(), user.getAuthToken())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

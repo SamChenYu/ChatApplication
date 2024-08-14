@@ -58,7 +58,8 @@ async function requestRecentMessages() {
         const response = await fetch("http://localhost:8080/chatUpdateRequest", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${authToken}`
             },
             body: JSON.stringify(
                 {

@@ -2,6 +2,9 @@ package com.samchenyu.chatapplication.service;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -11,10 +14,9 @@ import com.samchenyu.chatapplication.storage.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
-public class MessagingService {
+public class MessagingService implements UserDetailsService {
 
     @Autowired
     private UserRepository userRepository;
@@ -37,19 +39,6 @@ public class MessagingService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
-
-    public String newUUIDAuth(User user) {
-        String username = user.getUsername();
-        String newUUID = UUID.randomUUID().toString();
-
-        User existingUser = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User with username " + username + " not found"));
-        existingUser.setAuthToken(newUUID);
-        userRepository.save(existingUser);
-
-        return newUUID;
-    }
-
 
     public boolean login(String username, String password) {
         Optional<User> userOptional = userRepository.findByUsername(username);
@@ -81,10 +70,6 @@ public class MessagingService {
         user.setAuthToken(null);
         userRepository.save(user);
     }
-
-
-
-
 
     // CHAT SERVICE
 
@@ -168,5 +153,25 @@ public class MessagingService {
         }
     }
 
+    // USER DETAILS SERVICE INTERFACE
+    // This method is used by the JWT filter to load user details
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+        UserDetails userDetails = org.springframework.security.core.userdetails.User.builder()
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .authorities("USER")
+                .build();
+        return userDetails;
+    }
 
+
+    public void setAuthToken(String username, String authToken) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User with username " + username + " not found"));
+        user.setAuthToken(authToken);
+        userRepository.save(user);
+    }
 }

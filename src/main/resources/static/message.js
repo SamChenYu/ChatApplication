@@ -60,7 +60,8 @@ async function loadChats() {
         const response = await fetch("http://localhost:8080/chatlist", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${authToken}`
             },
             body: JSON.stringify({
                 username,
@@ -199,7 +200,8 @@ async function loadMessages(isSocketUpdate) {
         const response = await fetch(url, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${authToken}`
             },
             body: JSON.stringify({
                 user: {
@@ -348,7 +350,8 @@ async function sendMessage() {
         const response = await fetch("http://localhost:8080/sendmessage", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${authToken}`
             },
             body: JSON.stringify(
 
@@ -421,7 +424,8 @@ async function searchUsers(searchValue) {
         const response = await fetch("http://localhost:8080/newchat", {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${authToken}`
             },
             body: JSON.stringify(data)
         });
@@ -453,6 +457,33 @@ function clearChat() {
     messagesChat.innerHTML = '';
 }
 
+
+
+window.addEventListener('beforeunload', function (e) {
+    // Disconnect the socket when the user leaves the page
+    if (socket != null) {
+        socket.close();
+    }
+
+    // Clear the authToken on client and server
+    sessionStorage.removeItem("authToken");
+    try {
+        fetch("http://localhost:8080/logout", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${authToken}`
+            },
+            body: JSON.stringify({
+                username,
+                password,
+                authToken
+            })
+        });
+    } catch (error) {
+        console.log(error);
+    }
+});
 
 
 

@@ -1,0 +1,29 @@
+
+services:
+  db:
+    image: mysql:latest
+    container_name: mysql_container
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ChatApplicationDB
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: admin
+    volumes:
+      - db_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: phpmyadmin_container
+    ports:
+      - "8081:80" # Access phpMyAdmin at http://localhost:8081
+    environment:
+      PMA_HOST: db
+      PMA_USER: user
+      PMA_PASSWORD: password
+    depends_on:
+      - db
+
+volumes:
+  db_data:
